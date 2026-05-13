@@ -2,6 +2,7 @@ import logging
 
 from extract.extract_fpl_data import fetch_bootstrap, fetch_fixtures
 from transform.transform_fpl_data import transform_teams, transform_gameweeks, transform_players, transform_fixtures
+from load.load_fpl_data import upsert_teams, upsert_gameweeks, upsert_players, upsert_fixtures
 
 logging.basicConfig(
     level=logging.INFO,
@@ -25,5 +26,15 @@ logging.info("Transforming Fixtures")
 fixtures = transform_fixtures(raw_fixtures)
 
 logging.info(f"Transformed {len(teams)} teams, {len(gameweeks)} gameweeks, {len(players)} players and {len(fixtures)} fixtures")
+
+# Load
+logging.info("Upserting teams...")
+upsert_teams(teams)
+logging.info("Upserting gameweeks...")
+upsert_gameweeks(gameweeks)
+logging.info("Upserting players...")
+upsert_players(players)
+logging.info("Upserting fixtures...")
+upsert_fixtures(fixtures)
 
 logging.info("Pipeline complete")
