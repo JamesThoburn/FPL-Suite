@@ -1,0 +1,4 @@
+.vscode
+.env
+apps/python-engine/src/venv
+apps/python-engine/src/**/__pycache__
