@@ -1,4 +1,5 @@
 .vscode
 .env
 apps/python-engine/src/venv
-apps/python-engine/src/**/__pycache__
+apps/python-engine/**/__pycache__
+apps/python-engine/**/.pytest_cache
