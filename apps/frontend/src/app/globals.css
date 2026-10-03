@@ -1,0 +1,632 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme static {
+  /* Text */
+  --color-text-primary: #202923;
+  --color-text-muted: #80867f;
+  --color-text-workspace-label: #898e86;
+  --color-text-nav-item: #6c756e;
+  --color-text-navigation-active: #245e3a;
+  --color-text-new-tag: #6a7d67;
+  --color-text-upgrade-icon: #40723c;
+  --color-text-upgrade-card-p: #747e6d;
+  --color-text-upgrade-card-button: #335d33;
+  --color-text-avatar: #636854;
+  --color-text-profile-small: #8b8e85;
+  --color-text-profile-svg: #81897d;
+  --color-text-breadcrumb: #969b94;
+  --color-text-breadcrumb-strong: #414a40;
+  --color-text-season-label: #7d837b;
+  --color-text-notification-button: #5e675d;
+  --color-text-eyebrow: #7f887c;
+  --color-text-page-heading-p: #858a80;
+  --color-text-team-connected: #677461;
+  --color-text-hero-eyebrow: #bed1b6;
+  --color-text-hero-p: #c1cfc1;
+  --color-text-light-button: #203e2a;
+  --color-text-deadline-span: #c8d3bf;
+  --color-text-deadline-small: #b8c5ad;
+  --color-text-deadline-i: #92ac92;
+  --color-text-hero-caption: #cbd9c5;
+  --color-text-stat-label: #81877b;
+  --color-text-stat-label-svg: #8e9a83;
+  --color-text-green-pill: #57814e;
+  --color-text-stat-unit: #8a8f81;
+  --color-text-stat-foot: #969b90;
+  --color-text-success: #608556;
+  --color-text-subtle-badge: #87917c;
+  --color-text-card-heading-p: #8b9184;
+  --color-text-card-heading-p-span: #b4b9ac;
+  --color-text-text-link: #526d48;
+  --color-text-text-link-hover: #143e2b;
+  --color-text-segmented-button: #939789;
+  --color-text-segmented-button-selected: #42523b;
+  --color-text-week-selector: #777f6f;
+  --color-text-week-selector-button: #8a9580;
+  --color-text-pitch-player: #394937;
+  --color-text-player-fixture: #64715b;
+  --color-text-team-footer: #929987;
+  --color-text-team-footer-strong: #68785e;
+  --color-text-fixture-date: #9a9e91;
+  --color-text-fixture-row-div: #555f4e;
+  --color-text-fixture-time: #8e9585;
+  --color-text-card-bottom-link: #647a54;
+  --color-text-insight-label: #7d8b6f;
+  --color-text-insight-label-span: #97a185;
+  --color-text-insight-card-h3: #43543a;
+  --color-text-insight-card-p: #88917a;
+  --color-text-section-title-span: #949b8a;
+  --color-text-tool-icon: #68805a;
+  --color-text-tool-card-h3: #45503f;
+  --color-text-tool-card-p: #969b8d;
+  --color-text-tool-card-svg: #97a18a;
+  --color-text-page-footer: #9ba091;
+  --color-text-player-list-small: #89937e;
+  --color-text-player-list-b: #5f7950;
+  --color-text-search-field: #9da693;
+  --color-text-search-field-input: #394c34;
+  --color-text-table-heading: #86927a;
+  --color-text-player-detail-small: #8b9680;
+  --color-text-shortlist-button: #607751;
+  --color-text-shortlist-button-added: #365d34;
+  --color-text-empty-state: #87947b;
+  --color-text-league-row-you: #436637;
+  --color-text-league-rank: #8d9883;
+  --color-text-league-row-p: #85927c;
+  --color-text-league-row-small: #809573;
+  --color-text-modal-close: #7b8971;
+  --color-text-modal-p: #7d8972;
+  --color-text-modal-stats-span: #8c987f;
+  --color-text-form-label: #667b56;
+  --color-text-form-label-input: #3d4e34;
+  --color-text-data-note: #96a18a;
+  --color-text-notice: #6a805d;
+  --color-text-pro-list: #5e7552;
+  --color-text-mobile-toggle: #607256;
+  --color-text-public-primary: #27332a;
+  --color-text-public-header-nav: #78806f;
+  --color-text-public-header-nav-a-hover: #1c6140;
+  --color-text-public-button: #f8fbf1;
+  --color-text-public-eyebrow: #819075;
+  --color-text-landing-hero-copy-h1: #29382d;
+  --color-text-landing-hero-copy-h1-span: #356b43;
+  --color-text-landing-hero-copy-p: #8a9281;
+  --color-text-secondary-link: #5f7553;
+  --color-text-secondary-link-hover: #23593b;
+  --color-text-hero-reassurance: #929b84;
+  --color-text-hero-reassurance-svg: #7b9867;
+  --color-text-image-top-label: #e2e9d6;
+  --color-text-image-editorial: #e5eddd;
+  --color-text-performance-icon: #6b8e55;
+  --color-text-floating-performance-div-span: #8c977f;
+  --color-text-floating-performance-strong: #4a5b40;
+  --color-text-landing-manifesto-p: #536146;
+  --color-text-landing-manifesto-span-last-child: #959d89;
+  --color-text-feature-icon: #6d875a;
+  --color-text-feature-card-top-span-last-child: #9ca58f;
+  --color-text-landing-feature-card-p: #8d9680;
+  --color-text-mini-avatar-outgoing: #788171;
+  --color-text-mini-avatar-incoming: #f2f7eb;
+  --color-text-mini-transfer-strong: #5a6750;
+  --color-text-mini-transfer-small: #a1a88e;
+  --color-text-mini-transfer-price: #7a886b;
+  --color-text-transfer-direction: #abb69d;
+  --color-text-player-avatar: #f0f6e9;
+  --color-text-form-tag: #779264;
+  --color-text-mini-player-stats-span: #99a28a;
+  --color-text-mini-player-stats-easy-fixture: #5a7b47;
+  --color-text-mini-league-div: #8d9880;
+  --color-text-mini-league-strong: #69795a;
+  --color-text-mini-league-b: #768a65;
+  --color-text-mini-league-small: #9ba98c;
+  --color-text-mini-league-i: #608150;
+  --color-text-feature-caption: #95a086;
+  --color-text-landing-steps-h2: #4a5c3f;
+  --color-text-landing-steps-div-p: #8a967c;
+  --color-text-landing-steps-h3: #526746;
+  --color-text-landing-steps-li-p: #8e9a80;
+  --color-text-landing-cta: #f5f7ea;
+  --color-text-landing-cta-public-eyebrow: #a1b592;
+  --color-text-landing-cta-p: #a7b89c;
+  --color-text-public-button-pale: #345333;
+  --color-text-landing-cta-div-nth-child-2-span: #92a987;
+  --color-text-public-footer-p: #9aa28e;
+  --color-text-auth-header-a-last-child: #929d85;
+  --color-text-auth-form-content-h1: #2c3c2e;
+  --color-text-auth-form-content-p: #949e87;
+  --color-text-google-button: #627054;
+  --color-text-auth-divider: #a4ac98;
+  --color-text-auth-label: #627354;
+  --color-text-auth-label-input: #33482e;
+  --color-text-auth-label-input-placeholder: #b0b7a4;
+  --color-text-forgot-password: #849673;
+  --color-text-forgot-password-hover: #3f6331;
+  --color-text-remember-me: #8b967d;
+  --color-text-remember-me-input: #386842;
+  --color-text-auth-form-content-auth-switch: #98a28b;
+  --color-text-auth-switch-a: #5d7b4a;
+  --color-text-password-hint: #a3ac95;
+  --color-text-auth-terms: #9ba68c;
+  --color-text-auth-terms-button: #6d8659;
+  --color-text-auth-static-note: #b0b8a5;
+  --color-text-auth-footer: #a2ac94;
+  --color-text-auth-visual: #f2f6e9;
+  --color-text-auth-visual-top: #d2ddc7;
+  --color-text-auth-visual-content-public-eyebrow: #bacbab;
+  --color-text-auth-visual-content-h2-span: #bacf9e;
+  --color-text-auth-visual-content-p: #b1c1a6;
+  --color-text-auth-benefits-span: #b8c9a9;
+  --color-text-auth-benefits-svg: #a0b889;
+  --color-text-auth-visual-bottom: #acc29b;
+
+  /* Surface */
+  --color-surface-page: #f7f8f6;
+  --color-surface-shell: #fcfcfa;
+  --color-surface-nav-item-hover: #eef2eb;
+  --color-surface-navigation-active: #e6eee3;
+  --color-surface-new-tag: #e9eee7;
+  --color-surface-upgrade-card: #edf1e7;
+  --color-surface-avatar: #eae9df;
+  --color-surface-notification-button-i: #59825a;
+  --color-surface-team-connected: #fcfdfb;
+  --color-surface-hero: #123c2c;
+  --color-surface-live-dot: #b5d9a0;
+  --color-surface-light-button: #f2f4e9;
+  --color-surface-light-button-hover: #dce8cc;
+  --color-surface-deadline: #173e2c80;
+  --color-surface-card: #fdfefb;
+  --color-surface-success: #edf3e7;
+  --color-surface-subtle-badge: #f0f2ea;
+  --color-surface-segmented: #f0f2ed;
+  --color-surface-captain: #3d5739;
+  --color-surface-player-name: #f7f9f0e6;
+  --color-surface-fixture-date: #f6f7f1;
+  --color-surface-crest: #bd343b;
+  --color-surface-crest-eve: #285aa0;
+  --color-surface-crest-liv: #c9444b;
+  --color-surface-crest-ful: #454943;
+  --color-surface-crest-lei: #78a5c4;
+  --color-surface-crest-mun: #c74f48;
+  --color-surface-fixture-time: #f5f6f0;
+  --color-surface-card-bottom-link-hover: #f1f5eb;
+  --color-surface-insight-card: #edf0e5;
+  --color-surface-insight-dots-i: #ced6c0;
+  --color-surface-insight-dots-i-first-child: #6e875a;
+  --color-surface-tool-card-hover: #eff3e9;
+  --color-surface-tool-icon: #f0f3e9;
+  --color-surface-table-heading: #f2f4ec;
+  --color-surface-shortlist-button-added: #dceadc;
+  --color-surface-modal-backdrop: #12221ca0;
+  --color-surface-modal: #fcfdf8;
+  --color-surface-modal-stats: #f0f4e9;
+  --color-surface-public-page: #f8f9f5;
+  --color-surface-public-eyebrow-span: #7b9a64;
+  --color-surface-landing-hero-image: #234739;
+  --color-surface-landing-image-shade: #153d3280;
+  --color-surface-landing-image-shade-2: #14362900;
+  --color-surface-landing-image-shade-3: #12392bb3;
+  --color-surface-floating-performance: #f8faf0f0;
+  --color-surface-performance-icon: #e7efdc;
+  --color-surface-performance-bars-i: #89a572;
+  --color-surface-performance-bars-i-nth-child-5: #53784b;
+  --color-surface-landing-feature-card: #fdfef9;
+  --color-surface-feature-icon: #edf2e4;
+  --color-surface-mini-transfer: #f3f5ee;
+  --color-surface-mini-avatar-outgoing: #e2e5da;
+  --color-surface-mini-avatar-incoming: #406a51;
+  --color-surface-player-avatar: #344940;
+  --color-surface-form-tag: #e5edda;
+  --color-surface-mini-player-stats-easy-fixture: #dce9d2;
+  --color-surface-mini-league-mini-league-you: #e4eddc;
+  --color-surface-landing-steps: #edf1e5;
+  --color-surface-callout: #153e2c;
+  --color-surface-public-button-pale: #eff4e3;
+  --color-surface-public-button-pale-hover: #dce8c9;
+  --color-surface-auth-page: #fafbf7;
+  --color-surface-google-button-hover: #f2f5eb;
+  --color-surface-auth-visual: #193d2d;
+  --color-surface-auth-visual-shade: #133c3170;
+  --color-surface-auth-visual-shade-2: #102c2380;
+  --color-surface-auth-visual-shade-3: #143b2bfa;
+  --color-surface-auth-visual-bottom-i: #8ba17e;
+  --color-surface-auth-visual-bottom-i-first-child: #b8cba5;
+
+  /* Brand */
+  --color-brand: #146442;
+
+  /* Border */
+  --color-border-default: #e8ebe5;
+  --color-border-team-connected: #e1e6dc;
+  --color-border-on-dark: #ffffff30;
+  --color-border-subtle-badge: #e7ebdf;
+  --color-border-segmented: #e9ece4;
+  --color-border-fixture-row: #eff1e9;
+  --color-border-crest: #e5c37c;
+  --color-border-crest-eve: #becbd7;
+  --color-border-crest-liv: #9bbcb1;
+  --color-border-crest-ful: #d2d5cc;
+  --color-border-crest-lei: #b9cdda;
+  --color-border-crest-mun: #d5b365;
+  --color-border-insight-card: #e3e8d8;
+  --color-border-form-label-input: #dce5d4;
+  --color-border-public-header: #e6e9e0;
+  --color-border-performance-icon: #d9e6ca;
+  --color-border-landing-manifesto: #e7eade;
+  --color-border-landing-feature-card: #e5e9dd;
+  --color-border-mini-transfer: #e9edde;
+  --color-border-mini-player-stats: #e3e9d8;
+  --color-border-mini-player-stats-span: #e2e8d8;
+  --color-border-landing-steps: #e6eadc;
+  --color-border-landing-steps-li-span: #d3dec6;
+  --color-border-cta-pitch: #73956922;
+  --color-border-public-footer: #e5e9df;
+  --color-border-google-button: #dfe6d6;
+  --color-border-auth-label-input: #dfe6d5;
+  --color-border-auth-visual-bottom: #e1eacc22;
+  --color-border-auth-footer: #e9eddf;
+
+  /* Transparent */
+  --color-transparent: transparent;
+
+  /* Focus */
+  --color-focus-ring: #86b99b;
+
+  /* White */
+  --color-white: #ffffff;
+
+  /* Status */
+  --color-status-available: #608f5b;
+
+  /* Overlay */
+  --color-overlay-hero-solid: #123d2d;
+  --color-overlay-hero-fade: rgba(18, 61, 45, .75);
+  --color-overlay-hero-end: rgba(10, 38, 28, .24);
+  --color-overlay-hero-mobile-start: #123d2ded;
+  --color-overlay-hero-mobile-end: #123d2d30;
+
+  /* Shadow */
+  --color-shadow-segmented-button-selected: #0000000b;
+  --color-shadow-shirt: #00000015;
+  --color-shadow-tool-card-hover: #25402008;
+  --color-shadow-modal: #00140833;
+  --color-shadow-sidebar: #11251620;
+  --color-shadow-floating-performance: #05261920;
+  --color-shadow-auth-label-input: #253b1603;
+
+  /* Pitch */
+  --color-pitch-stripe: #e5eddf;
+  --color-pitch-stripe-alternate: #eaf0e4;
+  --color-pitch-line-soft: #ffffff99;
+  --color-pitch-line: #ffffffaa;
+
+  /* Kit */
+  --color-kit-red: #cf383b;
+  --color-kit-gold: #e8bc4b;
+  --color-kit-sky: #88bad4;
+  --color-kit-blue: #3865b5;
+  --color-kit-black: #353d3b;
+  --color-kit-stripe: #c34341;
+  --color-kit-outline: rgba(0, 0, 0, .12);
+
+  /* Action */
+  --color-action-primary: #225f40;
+  --color-action-primary-hover: #15472e;
+  --color-action-public-hover: #17472f;
+
+  /* Google */
+  --color-google-blue: #4285f4;
+  --color-google-green: #34a853;
+  --color-google-yellow: #fbbc05;
+  --color-google-red: #ea4335;
+  /* Dark palette: semantic tokens below reuse these values. */
+  --color-dark-page: #101713;
+  --color-dark-shell: #141d17;
+  --color-dark-card: #19241c;
+  --color-dark-inset: #202c22;
+  --color-dark-hover: #293a2b;
+  --color-dark-active: #294433;
+  --color-dark-border: #344338;
+  --color-dark-border-strong: #465842;
+  --color-dark-text: #e4ebdf;
+  --color-dark-text-secondary: #c2cdbb;
+  --color-dark-text-muted: #a4b29b;
+  --color-dark-accent: #a2c98b;
+  --color-dark-accent-hover: #c0dea9;
+  --color-dark-action: #356646;
+  --color-dark-action-hover: #407c54;
+  --color-dark-card-overlay: #19241cf0;
+  --color-dark-shadow: #00000066;
+  --color-dark-backdrop: #050c09cc;
+  --color-dark-pitch: #223d2a;
+  --color-dark-pitch-alternate: #28472f;
+  --color-dark-pitch-line: #a2c98b40;
+}
+
+:root {
+  color-scheme: light;
+}
+
+/* Remap the existing theme: components never need a second set of colour classes. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-text-primary: var(--color-dark-text);
+  --color-text-muted: var(--color-dark-text-secondary);
+  --color-text-workspace-label: var(--color-dark-text-secondary);
+  --color-text-nav-item: var(--color-dark-text-secondary);
+  --color-text-navigation-active: var(--color-dark-accent);
+  --color-text-new-tag: var(--color-dark-text-secondary);
+  --color-text-upgrade-icon: var(--color-dark-accent);
+  --color-text-upgrade-card-p: var(--color-dark-text-secondary);
+  --color-text-upgrade-card-button: var(--color-dark-text);
+  --color-text-avatar: var(--color-dark-text-secondary);
+  --color-text-profile-small: var(--color-dark-text-secondary);
+  --color-text-profile-svg: var(--color-dark-text-secondary);
+  --color-text-breadcrumb: var(--color-dark-text-muted);
+  --color-text-breadcrumb-strong: var(--color-dark-text);
+  --color-text-season-label: var(--color-dark-text-secondary);
+  --color-text-notification-button: var(--color-dark-text-secondary);
+  --color-text-eyebrow: var(--color-dark-text-secondary);
+  --color-text-page-heading-p: var(--color-dark-text-secondary);
+  --color-text-team-connected: var(--color-dark-text-secondary);
+  --color-text-stat-label: var(--color-dark-text-secondary);
+  --color-text-stat-label-svg: var(--color-dark-text-muted);
+  --color-text-green-pill: var(--color-dark-text-secondary);
+  --color-text-stat-unit: var(--color-dark-text-secondary);
+  --color-text-stat-foot: var(--color-dark-text-muted);
+  --color-text-success: var(--color-dark-accent);
+  --color-text-subtle-badge: var(--color-dark-text-secondary);
+  --color-text-card-heading-p: var(--color-dark-text-secondary);
+  --color-text-card-heading-p-span: var(--color-dark-text-muted);
+  --color-text-text-link: var(--color-dark-accent);
+  --color-text-text-link-hover: var(--color-dark-accent);
+  --color-text-segmented-button: var(--color-dark-text-muted);
+  --color-text-segmented-button-selected: var(--color-dark-text);
+  --color-text-week-selector: var(--color-dark-text-secondary);
+  --color-text-week-selector-button: var(--color-dark-text-muted);
+  --color-text-pitch-player: var(--color-dark-text);
+  --color-text-player-fixture: var(--color-dark-text-secondary);
+  --color-text-team-footer: var(--color-dark-text-muted);
+  --color-text-team-footer-strong: var(--color-dark-text-secondary);
+  --color-text-fixture-date: var(--color-dark-text-muted);
+  --color-text-fixture-row-div: var(--color-dark-text);
+  --color-text-fixture-time: var(--color-dark-text-muted);
+  --color-text-card-bottom-link: var(--color-dark-accent);
+  --color-text-insight-label: var(--color-dark-text-secondary);
+  --color-text-insight-label-span: var(--color-dark-text-muted);
+  --color-text-insight-card-h3: var(--color-dark-text);
+  --color-text-insight-card-p: var(--color-dark-text-secondary);
+  --color-text-section-title-span: var(--color-dark-text-muted);
+  --color-text-tool-icon: var(--color-dark-accent);
+  --color-text-tool-card-h3: var(--color-dark-text);
+  --color-text-tool-card-p: var(--color-dark-text-muted);
+  --color-text-tool-card-svg: var(--color-dark-text-muted);
+  --color-text-page-footer: var(--color-dark-text-muted);
+  --color-text-player-list-small: var(--color-dark-text-muted);
+  --color-text-player-list-b: var(--color-dark-text-secondary);
+  --color-text-search-field: var(--color-dark-text-muted);
+  --color-text-search-field-input: var(--color-dark-text);
+  --color-text-table-heading: var(--color-dark-text-secondary);
+  --color-text-player-detail-small: var(--color-dark-text-muted);
+  --color-text-shortlist-button: var(--color-dark-accent);
+  --color-text-shortlist-button-added: var(--color-dark-accent);
+  --color-text-empty-state: var(--color-dark-text-muted);
+  --color-text-league-row-you: var(--color-dark-accent);
+  --color-text-league-rank: var(--color-dark-text-muted);
+  --color-text-league-row-p: var(--color-dark-text-secondary);
+  --color-text-league-row-small: var(--color-dark-text-secondary);
+  --color-text-modal-close: var(--color-dark-text-secondary);
+  --color-text-modal-p: var(--color-dark-text-secondary);
+  --color-text-modal-stats-span: var(--color-dark-text-muted);
+  --color-text-form-label: var(--color-dark-text-secondary);
+  --color-text-form-label-input: var(--color-dark-text);
+  --color-text-data-note: var(--color-dark-text-muted);
+  --color-text-notice: var(--color-dark-text-secondary);
+  --color-text-pro-list: var(--color-dark-accent);
+  --color-text-mobile-toggle: var(--color-dark-text-secondary);
+  --color-text-public-primary: var(--color-dark-text);
+  --color-text-public-header-nav: var(--color-dark-text-secondary);
+  --color-text-public-header-nav-a-hover: var(--color-dark-text);
+  --color-text-public-eyebrow: var(--color-dark-text-secondary);
+  --color-text-landing-hero-copy-h1: var(--color-dark-text);
+  --color-text-landing-hero-copy-h1-span: var(--color-dark-accent);
+  --color-text-landing-hero-copy-p: var(--color-dark-text-muted);
+  --color-text-secondary-link: var(--color-dark-accent);
+  --color-text-secondary-link-hover: var(--color-dark-accent);
+  --color-text-hero-reassurance: var(--color-dark-text-muted);
+  --color-text-hero-reassurance-svg: var(--color-dark-accent);
+  --color-text-performance-icon: var(--color-dark-accent);
+  --color-text-floating-performance-div-span: var(--color-dark-text-muted);
+  --color-text-floating-performance-strong: var(--color-dark-text);
+  --color-text-landing-manifesto-p: var(--color-dark-text);
+  --color-text-landing-manifesto-span-last-child: var(--color-dark-text-muted);
+  --color-text-feature-icon: var(--color-dark-accent);
+  --color-text-feature-card-top-span-last-child: var(--color-dark-text-muted);
+  --color-text-landing-feature-card-p: var(--color-dark-text-muted);
+  --color-text-mini-avatar-outgoing: var(--color-dark-text-secondary);
+  --color-text-mini-transfer-strong: var(--color-dark-text-secondary);
+  --color-text-mini-transfer-small: var(--color-dark-text-muted);
+  --color-text-mini-transfer-price: var(--color-dark-text-secondary);
+  --color-text-transfer-direction: var(--color-dark-text-muted);
+  --color-text-form-tag: var(--color-dark-accent);
+  --color-text-mini-player-stats-span: var(--color-dark-text-muted);
+  --color-text-mini-player-stats-easy-fixture: var(--color-dark-accent);
+  --color-text-mini-league-div: var(--color-dark-text-muted);
+  --color-text-mini-league-strong: var(--color-dark-text-secondary);
+  --color-text-mini-league-b: var(--color-dark-text-secondary);
+  --color-text-mini-league-small: var(--color-dark-text-muted);
+  --color-text-mini-league-i: var(--color-dark-accent);
+  --color-text-feature-caption: var(--color-dark-text-muted);
+  --color-text-landing-steps-h2: var(--color-dark-text);
+  --color-text-landing-steps-div-p: var(--color-dark-text-muted);
+  --color-text-landing-steps-h3: var(--color-dark-text);
+  --color-text-landing-steps-li-p: var(--color-dark-text-muted);
+  --color-text-public-footer-p: var(--color-dark-text-muted);
+  --color-text-auth-header-a-last-child: var(--color-dark-text-muted);
+  --color-text-auth-form-content-h1: var(--color-dark-text);
+  --color-text-auth-form-content-p: var(--color-dark-text-muted);
+  --color-text-google-button: var(--color-dark-text-secondary);
+  --color-text-auth-divider: var(--color-dark-text-muted);
+  --color-text-auth-label: var(--color-dark-text-secondary);
+  --color-text-auth-label-input: var(--color-dark-text);
+  --color-text-auth-label-input-placeholder: var(--color-dark-text-muted);
+  --color-text-forgot-password: var(--color-dark-accent);
+  --color-text-forgot-password-hover: var(--color-dark-accent);
+  --color-text-remember-me: var(--color-dark-text-muted);
+  --color-text-remember-me-input: var(--color-dark-accent);
+  --color-text-auth-form-content-auth-switch: var(--color-dark-text-muted);
+  --color-text-auth-switch-a: var(--color-dark-accent);
+  --color-text-password-hint: var(--color-dark-text-muted);
+  --color-text-auth-terms: var(--color-dark-text-muted);
+  --color-text-auth-terms-button: var(--color-dark-accent);
+  --color-text-auth-static-note: var(--color-dark-text-muted);
+  --color-text-auth-footer: var(--color-dark-text-muted);
+  --color-surface-page: var(--color-dark-page);
+  --color-surface-shell: var(--color-dark-shell);
+  --color-surface-nav-item-hover: var(--color-dark-hover);
+  --color-surface-navigation-active: var(--color-dark-active);
+  --color-surface-new-tag: var(--color-dark-inset);
+  --color-surface-upgrade-card: var(--color-dark-card);
+  --color-surface-avatar: var(--color-dark-inset);
+  --color-surface-team-connected: var(--color-dark-card);
+  --color-surface-card: var(--color-dark-card);
+  --color-surface-success: var(--color-dark-active);
+  --color-surface-subtle-badge: var(--color-dark-inset);
+  --color-surface-segmented: var(--color-dark-inset);
+  --color-surface-player-name: var(--color-dark-card);
+  --color-surface-fixture-date: var(--color-dark-inset);
+  --color-surface-fixture-time: var(--color-dark-inset);
+  --color-surface-card-bottom-link-hover: var(--color-dark-hover);
+  --color-surface-insight-card: var(--color-dark-card);
+  --color-surface-insight-dots-i: var(--color-dark-border-strong);
+  --color-surface-insight-dots-i-first-child: var(--color-dark-accent);
+  --color-surface-tool-card-hover: var(--color-dark-hover);
+  --color-surface-tool-icon: var(--color-dark-inset);
+  --color-surface-table-heading: var(--color-dark-inset);
+  --color-surface-shortlist-button-added: var(--color-dark-active);
+  --color-surface-modal-backdrop: var(--color-dark-backdrop);
+  --color-surface-modal: var(--color-dark-card);
+  --color-surface-modal-stats: var(--color-dark-inset);
+  --color-surface-public-page: var(--color-dark-page);
+  --color-surface-floating-performance: var(--color-dark-card-overlay);
+  --color-surface-performance-icon: var(--color-dark-inset);
+  --color-surface-performance-bars-i: var(--color-dark-accent);
+  --color-surface-performance-bars-i-nth-child-5: var(--color-dark-accent-hover);
+  --color-surface-landing-feature-card: var(--color-dark-card);
+  --color-surface-feature-icon: var(--color-dark-inset);
+  --color-surface-mini-transfer: var(--color-dark-inset);
+  --color-surface-mini-avatar-outgoing: var(--color-dark-inset);
+  --color-surface-form-tag: var(--color-dark-inset);
+  --color-surface-mini-player-stats-easy-fixture: var(--color-dark-active);
+  --color-surface-mini-league-mini-league-you: var(--color-dark-active);
+  --color-surface-landing-steps: var(--color-dark-inset);
+  --color-surface-auth-page: var(--color-dark-page);
+  --color-surface-google-button-hover: var(--color-dark-hover);
+  --color-border-default: var(--color-dark-border);
+  --color-border-team-connected: var(--color-dark-border);
+  --color-border-subtle-badge: var(--color-dark-border);
+  --color-border-segmented: var(--color-dark-border);
+  --color-border-fixture-row: var(--color-dark-border);
+  --color-border-insight-card: var(--color-dark-border);
+  --color-border-form-label-input: var(--color-dark-border-strong);
+  --color-border-public-header: var(--color-dark-border);
+  --color-border-performance-icon: var(--color-dark-border);
+  --color-border-landing-manifesto: var(--color-dark-border);
+  --color-border-landing-feature-card: var(--color-dark-border);
+  --color-border-mini-transfer: var(--color-dark-border);
+  --color-border-mini-player-stats: var(--color-dark-border);
+  --color-border-mini-player-stats-span: var(--color-dark-border);
+  --color-border-landing-steps: var(--color-dark-border);
+  --color-border-landing-steps-li-span: var(--color-dark-border);
+  --color-border-public-footer: var(--color-dark-border);
+  --color-border-google-button: var(--color-dark-border-strong);
+  --color-border-auth-label-input: var(--color-dark-border-strong);
+  --color-border-auth-footer: var(--color-dark-border);
+  --color-shadow-segmented-button-selected: var(--color-dark-shadow);
+  --color-shadow-shirt: var(--color-dark-shadow);
+  --color-shadow-tool-card-hover: var(--color-dark-shadow);
+  --color-shadow-modal: var(--color-dark-shadow);
+  --color-shadow-sidebar: var(--color-dark-shadow);
+  --color-shadow-floating-performance: var(--color-dark-shadow);
+  --color-shadow-auth-label-input: var(--color-dark-shadow);
+  --color-brand: var(--color-dark-accent);
+  --color-focus-ring: var(--color-dark-accent);
+  --color-status-available: var(--color-dark-accent);
+  --color-action-primary: var(--color-dark-action);
+  --color-action-primary-hover: var(--color-dark-action-hover);
+  --color-action-public-hover: var(--color-dark-action-hover);
+  --color-pitch-stripe: var(--color-dark-pitch);
+  --color-pitch-stripe-alternate: var(--color-dark-pitch-alternate);
+  --color-pitch-line: var(--color-dark-pitch-line);
+  --color-pitch-line-soft: var(--color-dark-pitch-line);
+}
+
+:root {
+  font-family: var(--font-dm-sans), sans-serif;
+  color: var(--color-text-primary);
+  background: var(--color-surface-page);
+  font-synthesis: none
+}
+
+@layer base {
+  * {
+    box-sizing: border-box
+  }
+
+  body {
+    margin: 0
+  }
+
+  button,
+  a,
+  input {
+    -webkit-tap-highlight-color: var(--color-transparent)
+  }
+
+  button {
+    font: inherit;
+    cursor: pointer;
+    border: 0
+  }
+
+  button,
+  a {
+    transition: background .18s, color .18s, box-shadow .18s
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible {
+    outline: 3px solid var(--color-focus-ring);
+    outline-offset: 4px
+  }
+
+  button:disabled {
+    opacity: .45;
+    cursor: not-allowed
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0
+  }
+
+  button svg {
+    flex-shrink: 0
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  * {
+    scroll-behavior: auto !important;
+    transition: none !important
+  }
+}
