@@ -1,0 +1,97 @@
+"use client"
+
+import Link from "next/link"
+import Icon from "@/components/ui/Icon"
+import GoogleMark from "./GoogleMark"
+
+export type AuthMode = "login" | "signup"
+
+export default function AuthForm({ mode }: { mode: AuthMode }) {
+    const signup = mode === "signup"
+
+    return (
+        <div className="mx-auto my-auto w-full max-w-91.25 px-6 pt-7 pb-8.75 min-[601px]:max-w-72.5 min-[601px]:px-0 min-[601px]:pt-7.5 min-[601px]:pb-8.75 min-[851px]:max-w-[320px] min-[1101px]:max-w-92 min-[1101px]:px-0 min-[1101px]:pt-8.5 min-[1101px]:pb-10.5 min-[1500px]:max-w-98.75">
+            <div className="flex items-center gap-2 text-[6px] font-semibold tracking-[1.3px] text-text-public-eyebrow min-[601px]:text-[6px] min-[851px]:tracking-[1.2px] min-[1101px]:text-[7px] min-[1101px]:tracking-[1.5px]">
+                {signup ? "YOUR NEXT GREEN ARROW STARTS HERE" : "BACK IN YOUR CORNER"}
+            </div>
+            <h1 className="my-3.75 whitespace-pre-line text-[36px] leading-[1.18] font-semibold tracking-[-1.3px] text-text-auth-form-content-h1 min-[601px]:text-[31px] min-[851px]:text-[34px] min-[1101px]:text-[37px] min-[1500px]:text-[43px]">
+                {signup ? "A smarter game\nstarts with you." : "Welcome back,\nmanager."}
+            </h1>
+            <p className="text-[10px] leading-[1.8] text-text-auth-form-content-p min-[1101px]:text-[11px] min-[1500px]:text-xs">
+                {signup
+                    ? "Make yourself at home. Your edge is waiting."
+                    : "New gameweek. New possibilities. Let’s get into it."}
+            </p>
+            <button className="mt-6.25 flex w-full items-center justify-center gap-2.75 rounded-[5px] border border-border-google-button bg-surface-card p-3.5 text-[11px] text-text-google-button hover:bg-surface-google-button-hover min-[1101px]:mt-6.75 min-[1101px]:p-3.25 min-[1500px]:p-4 min-[1500px]:text-xs" type="button">
+                <GoogleMark />
+                {signup ? "Sign up with Google" : "Continue with Google"}
+            </button>
+            <div className="my-5.75 flex items-center gap-3.25 text-[8px] text-text-auth-divider min-[1101px]:my-5.5">
+                <span className="h-px flex-1 bg-border-landing-feature-card" />
+                {signup ? "or sign up with email" : "or log in with email"}
+                <span className="h-px flex-1 bg-border-landing-feature-card" />
+            </div>
+            <form onSubmit={(event) => event.preventDefault()}>
+                {signup && (
+                    <label className="mb-5 block text-[10px] font-medium text-text-auth-label min-[1101px]:mb-4.5">
+                        Your name
+                        <input className="mt-2 block w-full rounded-[5px] border border-border-auth-label-input bg-surface-card p-3.5 text-[11px] text-text-auth-label-input shadow-[0_1px_1px_var(--color-shadow-auth-label-input)] placeholder:text-text-auth-label-input-placeholder min-[1101px]:p-[13px_14px] min-[1500px]:p-4" type="text" name="name" placeholder="Jamie Davies" autoComplete="name" />
+                    </label>
+                )}
+                <label className="mb-5 block text-[10px] font-medium text-text-auth-label min-[1101px]:mb-4.5">
+                    Email address
+                    <input className="mt-2 block w-full rounded-[5px] border border-border-auth-label-input bg-surface-card p-3.5 text-[11px] text-text-auth-label-input shadow-[0_1px_1px_var(--color-shadow-auth-label-input)] placeholder:text-text-auth-label-input-placeholder min-[1101px]:p-[13px_14px] min-[1500px]:p-4" type="email" name="email" placeholder="you@example.com" autoComplete="email" />
+                </label>
+                <label className="mb-5 block text-[10px] font-medium text-text-auth-label min-[1101px]:mb-4.5">
+                    <span className="flex items-center justify-between">
+                        Password
+                        {!signup && (
+                            <button type="button" className="bg-transparent p-0 text-[8px] font-normal text-text-forgot-password hover:text-text-forgot-password-hover">
+                                Forgot password?
+                            </button>
+                        )}
+                    </span>
+                    <input
+                        className="mt-2 block w-full rounded-[5px] border border-border-auth-label-input bg-surface-card p-3.5 text-[11px] text-text-auth-label-input shadow-[0_1px_1px_var(--color-shadow-auth-label-input)] placeholder:text-text-auth-label-input-placeholder min-[1101px]:p-[13px_14px] min-[1500px]:p-4"
+                        type="password"
+                        name="password"
+                        placeholder={signup ? "Create a password" : "Enter your password"}
+                        autoComplete={signup ? "new-password" : "current-password"}
+                    />
+                </label>
+                {signup ? (
+                    <p className="-mt-2.5 mb-4.75 text-[7px] leading-[1.7] text-text-password-hint min-[1101px]:text-[8px]">
+                        A little security goes a long way. Use at least 8 characters.
+                    </p>
+                ) : (
+                    <label className="my-px mb-4.75 flex items-center gap-2 text-[9px] text-text-remember-me">
+                        <input className="m-0 size-3 shrink-0 accent-text-remember-me-input" type="checkbox" name="remember" />
+                        Keep me logged in
+                    </label>
+                )}
+                {signup && (
+                    <label className="my-0.75 mb-4.25 flex items-start gap-2 text-[7px] leading-[1.8] text-text-auth-terms min-[1101px]:text-[8px]">
+                        <input className="mt-0.5 m-0 size-3 shrink-0 accent-text-remember-me-input" type="checkbox" name="terms" />
+                        <span>
+                            I agree to the <button className="bg-transparent p-0 text-inherit underline decoration-text-auth-terms-button underline-offset-[3px]" type="button">Terms of Service</button> and{" "}
+                            <button className="bg-transparent p-0 text-inherit underline decoration-text-auth-terms-button underline-offset-[3px]" type="button">Privacy Policy</button>.
+                        </span>
+                    </label>
+                )}
+                <button className="mt-1.5 inline-flex w-full items-center justify-between gap-6.25 rounded-[5px] bg-action-primary px-4 py-3.75 text-[11px] font-semibold text-text-public-button hover:bg-action-public-hover min-[1101px]:px-4.25 min-[1101px]:py-3.5 min-[1500px]:p-4.25" type="button">
+                    {signup ? "Create my account" : "Log in"}
+                    <Icon name="arrow" size={19} strokeWidth={1.6} />
+                </button>
+            </form>
+            <p className="mt-5.75 text-center text-[9px] text-text-auth-form-content-auth-switch min-[1101px]:text-[10px]">
+                {signup ? "Already part of the Suite?" : "New to FPL Suite?"}{" "}
+                <Link className="ml-1 font-[550] text-text-auth-switch-a" href={signup ? "/login" : "/signup"}>
+                    {signup ? "Log in" : "Create an account"} <span>↗</span>
+                </Link>
+            </p>
+            <div className="mt-5.75 text-center text-[7px] leading-[1.7] text-text-auth-static-note min-[1101px]:mt-6.25">
+                Design preview only. No account details are submitted.
+            </div>
+        </div>
+    )
+}
