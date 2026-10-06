@@ -1,13 +1,66 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import Icon from "@/components/ui/Icon"
 import GoogleMark from "./GoogleMark"
+import { SubmitEvent, useState } from "react"
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client"
 
 export type AuthMode = "login" | "signup"
 
 export default function AuthForm({ mode }: { mode: AuthMode }) {
     const signup = mode === "signup"
+    const supabase = getSupabaseBrowserClient();
+    const router = useRouter();
+    const [status, setStatus] = useState<{ message: string; type: "error" | "success" } | null>(null);
+
+    async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+        const email = String(formData.get("email") ?? "").trim();
+        const password = String(formData.get("password") ?? "");
+        const name = String(formData.get("name") ?? "").trim();
+        const terms = formData.get("terms") === "on"
+
+        if (signup && !terms) {
+            setStatus({ message: "You need to accept the terms to continue.", type: "error" })
+            return
+        }
+
+        if (signup) {
+            const { error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    emailRedirectTo: `${window.location.origin}/welcome`
+                }
+            });
+
+            if (error) {
+                setStatus({ message: error.message, type: "error" });
+            } else {
+                setStatus({
+                    message: "If there is no existing account with this email, you’ll receive a confirmation link. If you already have an account, try logging in.",
+                    type: "success",
+                });
+            }
+        } else {
+            const { error, data } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+            
+            if (error) {
+                setStatus({ message: error.message, type: "error" });
+            } else {
+                setStatus({ message: "Signed in successfully, redirecting to dashboard.", type: "success" });
+                window.setTimeout(() => router.replace("/dashboard"), 1000);
+            }
+        }
+
+    }
 
     return (
         <div className="mx-auto my-auto w-full max-w-91.25 px-6 pt-7 pb-8.75 min-[601px]:max-w-72.5 min-[601px]:px-0 min-[601px]:pt-7.5 min-[601px]:pb-8.75 min-[851px]:max-w-[320px] min-[1101px]:max-w-92 min-[1101px]:px-0 min-[1101px]:pt-8.5 min-[1101px]:pb-10.5 min-[1500px]:max-w-98.75">
@@ -22,6 +75,19 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                     ? "Make yourself at home. Your edge is waiting."
                     : "New gameweek. New possibilities. Let’s get into it."}
             </p>
+            {status && (
+                <p
+                    className={`mt-4 rounded-[5px] border px-3.5 py-3 text-[9px] leading-[1.6] ${
+                        status.type === "error"
+                            ? "border-red-200 bg-red-50 text-red-800"
+                            : "border-green-200 bg-green-50 text-green-800"
+                    }`}
+                    role={status.type === "error" ? "alert" : "status"}
+                    aria-live={status.type === "error" ? "assertive" : "polite"}
+                >
+                    {status.message}
+                </p>
+            )}
             <button className="mt-6.25 flex w-full items-center justify-center gap-2.75 rounded-[5px] border border-border-google-button bg-surface-card p-3.5 text-[11px] text-text-google-button hover:bg-surface-google-button-hover min-[1101px]:mt-6.75 min-[1101px]:p-3.25 min-[1500px]:p-4 min-[1500px]:text-xs" type="button">
                 <GoogleMark />
                 {signup ? "Sign up with Google" : "Continue with Google"}
@@ -31,7 +97,7 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                 {signup ? "or sign up with email" : "or log in with email"}
                 <span className="h-px flex-1 bg-border-landing-feature-card" />
             </div>
-            <form onSubmit={(event) => event.preventDefault()}>
+            <form onSubmit={handleSubmit}>
                 {signup && (
                     <label className="mb-5 block text-[10px] font-medium text-text-auth-label min-[1101px]:mb-4.5">
                         Your name
@@ -78,7 +144,7 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                         </span>
                     </label>
                 )}
-                <button className="mt-1.5 inline-flex w-full items-center justify-between gap-6.25 rounded-[5px] bg-action-primary px-4 py-3.75 text-[11px] font-semibold text-text-public-button hover:bg-action-public-hover min-[1101px]:px-4.25 min-[1101px]:py-3.5 min-[1500px]:p-4.25" type="button">
+                <button className="mt-1.5 inline-flex w-full items-center justify-between gap-6.25 rounded-[5px] bg-action-primary px-4 py-3.75 text-[11px] font-semibold text-text-public-button hover:bg-action-public-hover min-[1101px]:px-4.25 min-[1101px]:py-3.5 min-[1500px]:p-4.25" type="submit">
                     {signup ? "Create my account" : "Log in"}
                     <Icon name="arrow" size={19} strokeWidth={1.6} />
                 </button>
