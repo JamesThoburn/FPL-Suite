@@ -6,6 +6,8 @@ import Icon from "@/components/ui/Icon"
 import GoogleMark from "./GoogleMark"
 import { SubmitEvent, useState } from "react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client"
+import { AUTH_PERSISTENCE_COOKIE } from "@/lib/supabase/cookie-policy"
+import { stringifySetCookie } from "cookie";
 
 export type AuthMode = "login" | "signup"
 
@@ -21,7 +23,6 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
         const formData = new FormData(event.currentTarget);
         const email = String(formData.get("email") ?? "").trim();
         const password = String(formData.get("password") ?? "");
-        const name = String(formData.get("name") ?? "").trim();
         const terms = formData.get("terms") === "on"
 
         if (signup && !terms) {
@@ -29,7 +30,8 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
             return
         }
 
-        if (signup) {
+        // Sign up & Sign in
+        if (signup) { // Sign up
             const { error } = await supabase.auth.signUp({
                 email,
                 password,
@@ -46,8 +48,19 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                     type: "success",
                 });
             }
-        } else {
-            const { error, data } = await supabase.auth.signInWithPassword({
+        } else { // Sign in
+            const rememberMe = formData.get("remember") === "on";
+
+            document.cookie = stringifySetCookie({
+                name: AUTH_PERSISTENCE_COOKIE,
+                value: rememberMe ? "persistent" : "session",
+                path: "/",
+                sameSite: "lax",
+                secure: window.location.protocol === "https:",
+                ...(rememberMe ? { maxAge: 400 * 24 * 60 * 60 }: {}),
+            })
+
+            const { error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });

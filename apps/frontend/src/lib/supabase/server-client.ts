@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { applyCookieLifetime, AUTH_PERSISTENCE_COOKIE } from "@/lib/supabase/cookie-policy";
 
 function getEnvironmentVariables() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -24,8 +25,12 @@ export async function createSupabaseServerClient() {
                 return cookieStore.getAll();
             },
             setAll(cookiesToSet) {
+                const rememberMe = cookieStore.get(AUTH_PERSISTENCE_COOKIE)?.value === "persistent";
+
                 try {
-                    cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+                    cookiesToSet.forEach(({ name, value, options }) =>
+                        cookieStore.set(name, value, applyCookieLifetime(options, rememberMe))
+                    );
                 } catch (error) {
                     console.log(error)
                 }

@@ -3,6 +3,8 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { stringifySetCookie } from "cookie";
+import { AUTH_PERSISTENCE_COOKIE } from "@/lib/supabase/cookie-policy";
 
 export default function SignOutButton() {
     const router = useRouter();
@@ -21,6 +23,15 @@ export default function SignOutButton() {
                 setIsSigningOut(false);
                 return;
             }
+
+            document.cookie = stringifySetCookie({
+                name: AUTH_PERSISTENCE_COOKIE,
+                value: "",
+                path: "/",
+                sameSite: "lax",
+                secure: window.location.protocol === "https:",
+                maxAge: 0,
+            });
 
             router.replace("/login");
             router.refresh();
