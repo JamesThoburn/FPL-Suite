@@ -168,9 +168,6 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                     {signup ? "Log in" : "Create an account"} <span>↗</span>
                 </Link>
             </p>
-            <div className="mt-5.75 text-center text-[7px] leading-[1.7] text-text-auth-static-note min-[1101px]:mt-6.25">
-                Design preview only. No account details are submitted.
-            </div>
         </div>
     )
 }
