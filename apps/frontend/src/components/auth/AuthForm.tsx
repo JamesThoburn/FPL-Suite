@@ -4,10 +4,10 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import Icon from "@/components/ui/Icon"
 import GoogleMark from "./GoogleMark"
-import { SubmitEvent, useState } from "react"
+import { SubmitEvent, useRef, useState } from "react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client"
 import { AUTH_PERSISTENCE_COOKIE } from "@/lib/supabase/cookie-policy"
-import { stringifySetCookie } from "cookie";
+import { stringifySetCookie } from "cookie"
 
 export type AuthMode = "login" | "signup"
 
@@ -16,39 +16,55 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
     const supabase = getSupabaseBrowserClient();
     const router = useRouter();
     const [status, setStatus] = useState<{ message: string; type: "error" | "success" } | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const isSubmittingRef = useRef(false);
 
     async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
+
+        if (isSubmittingRef.current) {
+            return;
+        }
+
+        isSubmittingRef.current = true;
+        setIsSubmitting(true);
+        setStatus(null);
 
         const formData = new FormData(event.currentTarget);
         const email = String(formData.get("email") ?? "").trim();
         const password = String(formData.get("password") ?? "");
         const terms = formData.get("terms") === "on"
 
-        if (signup && !terms) {
-            setStatus({ message: "You need to accept the terms to continue.", type: "error" })
-            return
-        }
-
-        // Sign up & Sign in
-        if (signup) { // Sign up
-            const { error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    emailRedirectTo: `${window.location.origin}/welcome`
+        try {
+            if (signup) {
+                if (!terms) {
+                    setStatus({
+                        message: "You need to accept the terms to continue.",
+                        type: "error",
+                    });
+                    return;
                 }
-            });
 
-            if (error) {
-                setStatus({ message: error.message, type: "error" });
-            } else {
+                const { error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/welcome`,
+                    },
+                });
+
+                if (error) {
+                    setStatus({ message: error.message, type: "error" });
+                    return;
+                }
+
                 setStatus({
                     message: "If there is no existing account with this email, you’ll receive a confirmation link. If you already have an account, try logging in.",
                     type: "success",
                 });
+                return;
             }
-        } else { // Sign in
+
             const rememberMe = formData.get("remember") === "on";
 
             document.cookie = stringifySetCookie({
@@ -57,22 +73,33 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                 path: "/",
                 sameSite: "lax",
                 secure: window.location.protocol === "https:",
-                ...(rememberMe ? { maxAge: 400 * 24 * 60 * 60 }: {}),
-            })
+                ...(rememberMe ? { maxAge: 400 * 24 * 60 * 60 } : {}),
+            });
 
             const { error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
-            
+
             if (error) {
                 setStatus({ message: error.message, type: "error" });
-            } else {
-                setStatus({ message: "Signed in successfully, redirecting to dashboard.", type: "success" });
-                window.setTimeout(() => router.replace("/dashboard"), 1000);
+                return;
             }
-        }
 
+            setStatus({
+                message: "Signed in successfully, redirecting to dashboard.",
+                type: "success",
+            });
+            window.setTimeout(() => router.replace("/dashboard"), 1000);
+        } catch {
+            setStatus({
+                message: "We couldn’t complete your request. Check your connection and try again.",
+                type: "error",
+            });
+        } finally {
+            isSubmittingRef.current = false;
+            setIsSubmitting(false);
+        }
     }
 
     return (
@@ -119,7 +146,7 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                 )}
                 <label className="mb-5 block text-[10px] font-medium text-text-auth-label min-[1101px]:mb-4.5">
                     Email address
-                    <input className="mt-2 block w-full rounded-[5px] border border-border-auth-label-input bg-surface-card p-3.5 text-[11px] text-text-auth-label-input shadow-[0_1px_1px_var(--color-shadow-auth-label-input)] placeholder:text-text-auth-label-input-placeholder min-[1101px]:p-[13px_14px] min-[1500px]:p-4" type="email" name="email" placeholder="you@example.com" autoComplete="email" />
+                    <input className="mt-2 block w-full rounded-[5px] border border-border-auth-label-input bg-surface-card p-3.5 text-[11px] text-text-auth-label-input shadow-[0_1px_1px_var(--color-shadow-auth-label-input)] placeholder:text-text-auth-label-input-placeholder min-[1101px]:p-[13px_14px] min-[1500px]:p-4" type="email" name="email" placeholder="you@example.com" autoComplete="email" required />
                 </label>
                 <label className="mb-5 block text-[10px] font-medium text-text-auth-label min-[1101px]:mb-4.5">
                     <span className="flex items-center justify-between">
@@ -135,6 +162,8 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                         type="password"
                         name="password"
                         placeholder={signup ? "Create a password" : "Enter your password"}
+                        required
+                        minLength={signup ? 8 : undefined}
                         autoComplete={signup ? "new-password" : "current-password"}
                     />
                 </label>
@@ -157,8 +186,14 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                         </span>
                     </label>
                 )}
-                <button className="mt-1.5 inline-flex w-full items-center justify-between gap-6.25 rounded-[5px] bg-action-primary px-4 py-3.75 text-[11px] font-semibold text-text-public-button hover:bg-action-public-hover min-[1101px]:px-4.25 min-[1101px]:py-3.5 min-[1500px]:p-4.25" type="submit">
-                    {signup ? "Create my account" : "Log in"}
+                <button className="mt-1.5 inline-flex w-full items-center justify-between gap-6.25 rounded-[5px] bg-action-primary px-4 py-3.75 text-[11px] font-semibold text-text-public-button hover:bg-action-public-hover disabled:cursor-not-allowed disabled:opacity-60 min-[1101px]:px-4.25 min-[1101px]:py-3.5 min-[1500px]:p-4.25" type="submit" disabled={isSubmitting}>
+                    {isSubmitting
+                        ? signup
+                            ? "Creating your account…"
+                            : "Logging in…"
+                        : signup
+                            ? "Create my account"
+                            : "Log in"}
                     <Icon name="arrow" size={19} strokeWidth={1.6} />
                 </button>
             </form>
