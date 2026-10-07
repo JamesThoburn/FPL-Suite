@@ -33,10 +33,22 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
         const formData = new FormData(event.currentTarget);
         const email = String(formData.get("email") ?? "").trim();
         const password = String(formData.get("password") ?? "");
-        const terms = formData.get("terms") === "on"
+        const terms = formData.get("terms") === "on";
+        const name = String(formData.get("name") ?? "").trim();
 
         try {
             if (signup) {
+                // Check that the name isn't full of spaces (note that .trim() would turn "    " to "")
+                if (!name) {
+                    setStatus({ message: "Enter your name to continue.", type: "error" });
+                    return;
+                }
+
+                if (name.length > 80) {
+                    setStatus({ message: "Your name must be 80 characters or fewer.", type: "error" });
+                    return;
+                }
+
                 if (!terms) {
                     setStatus({
                         message: "You need to accept the terms to continue.",
@@ -50,6 +62,9 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                     password,
                     options: {
                         emailRedirectTo: `${window.location.origin}/welcome`,
+                        data: {
+                            full_name: name,
+                        },
                     },
                 });
 
@@ -141,7 +156,15 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                 {signup && (
                     <label className="mb-5 block text-[10px] font-medium text-text-auth-label min-[1101px]:mb-4.5">
                         Your name
-                        <input className="mt-2 block w-full rounded-[5px] border border-border-auth-label-input bg-surface-card p-3.5 text-[11px] text-text-auth-label-input shadow-[0_1px_1px_var(--color-shadow-auth-label-input)] placeholder:text-text-auth-label-input-placeholder min-[1101px]:p-[13px_14px] min-[1500px]:p-4" type="text" name="name" placeholder="Jamie Davies" autoComplete="name" />
+                        <input
+                            className="mt-2 block w-full rounded-[5px] border border-border-auth-label-input bg-surface-card p-3.5 text-[11px] text-text-auth-label-input shadow-[0_1px_1px_var(--color-shadow-auth-label-input)] placeholder:text-text-auth-label-input-placeholder min-[1101px]:p-[13px_14px] min-[1500px]:p-4"
+                            type="text"
+                            name="name"
+                            placeholder="Jamie Davies"
+                            autoComplete="name"
+                            required
+                            maxLength={80}
+                        />
                     </label>
                 )}
                 <label className="mb-5 block text-[10px] font-medium text-text-auth-label min-[1101px]:mb-4.5">
