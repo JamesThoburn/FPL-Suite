@@ -218,9 +218,12 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                     <span className="flex items-center justify-between">
                         Password
                         {!signup && (
-                            <button type="button" className="bg-transparent p-0 text-[8px] font-normal text-text-forgot-password hover:text-text-forgot-password-hover">
+                            <Link
+                                href="/forgot-password"
+                                className="bg-transparent p-0 text-[8px] font-normal text-text-forgot-password hover:text-text-forgot-password-hover"
+                            >
                                 Forgot password?
-                            </button>
+                            </Link>
                         )}
                     </span>
                     <input
