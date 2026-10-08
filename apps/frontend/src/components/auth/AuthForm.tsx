@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import Icon from "@/components/ui/Icon"
 import GoogleMark from "./GoogleMark"
 import { SubmitEvent, useEffect, useRef, useState } from "react"
@@ -14,7 +13,6 @@ export type AuthMode = "login" | "signup"
 export default function AuthForm({ mode }: { mode: AuthMode }) {
     const signup = mode === "signup"
     const supabase = getSupabaseBrowserClient();
-    const router = useRouter();
     const [status, setStatus] = useState<{ message: string; type: "error" | "success" } | null>(null);
     const isSubmittingRef = useRef(false);
     const [submittingAction, setSubmittingAction] = useState<"email" | "google" | null>(null);
@@ -140,7 +138,7 @@ export default function AuthForm({ mode }: { mode: AuthMode }) {
                 message: "Signed in successfully, redirecting to dashboard.",
                 type: "success",
             });
-            window.setTimeout(() => router.replace("/dashboard"), 1000);
+            window.location.replace("/dashboard");
         } catch {
             setStatus({
                 message: "We couldn’t complete your request. Check your connection and try again.",
