@@ -6,6 +6,8 @@ import { useState } from "react";
 import { stringifySetCookie } from "cookie";
 import { AUTH_PERSISTENCE_COOKIE } from "@/lib/supabase/cookie-policy";
 
+// Will be updated
+
 export default function SignOutButton() {
     const router = useRouter();
     const [isSigningOut, setIsSigningOut] = useState(false);

@@ -51,7 +51,6 @@ export default function Hero() {
 function HeroImage() {
   return (
     <div className="relative h-80 overflow-hidden rounded-[9px] bg-surface-landing-hero-image min-[366px]:h-87.5 min-[601px]:h-105.5 min-[851px]:h-115 min-[1101px]:h-126.5">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="absolute size-full object-cover object-[46%_center]" src={stadiumImage} alt="A packed football stadium under the evening lights" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,var(--color-surface-landing-image-shade)_0%,var(--color-surface-landing-image-shade-2)_40%,var(--color-surface-landing-image-shade-3)_100%)]" />
       <div className="absolute top-5.5 left-5.5 right-3 flex items-center gap-1.75 text-[5px] font-medium tracking-[1px] text-text-image-top-label min-[601px]:top-7.25 min-[601px]:left-4.75 min-[601px]:right-3 min-[601px]:text-[4px] min-[851px]:text-[4px] min-[1101px]:left-5.5 min-[1101px]:text-[5px] min-[1500px]:left-6.25 min-[1500px]:text-[6px] min-[1500px]:tracking-[1.4px]">

@@ -10,7 +10,6 @@ const benefits = [
 export default function AuthVisual() {
   return (
     <aside className="relative m-[15px_15px_15px_0] hidden min-h-[calc(100vh-30px)] overflow-hidden rounded-[9px] bg-surface-auth-visual text-text-auth-visual min-[601px]:block">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="absolute size-full object-cover object-[47%_center] opacity-80" src={stadiumImage} alt="A football stadium filled with supporters at dusk" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,var(--color-surface-auth-visual-shade)_0%,var(--color-surface-auth-visual-shade-2)_35%,var(--color-surface-auth-visual-shade-3)_100%)]" />
       <div className="absolute top-6.75 left-5.5 right-5 flex items-center gap-1.75 text-[4px] tracking-[.7px] text-text-auth-visual-top min-[851px]:top-6.75 min-[851px]:left-6.75 min-[851px]:text-[5px] min-[1101px]:top-8.75 min-[1101px]:left-8.75 min-[1101px]:right-8.75 min-[1101px]:text-[6px] min-[1101px]:tracking-[1.6px] min-[1500px]:top-10.75 min-[1500px]:left-11.25 min-[1500px]:text-[8px]">
