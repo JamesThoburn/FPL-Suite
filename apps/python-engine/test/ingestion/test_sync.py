@@ -1,6 +1,44 @@
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from src.ingestion.sync import FPLSyncService
+from src.ingestion.sync import EVENT_COLUMNS, FPLSyncService
+
+def make_event(event_id=1):
+	return {
+        "id": event_id,
+        "name": f"Gameweek {event_id}",
+        "deadline_time": "2026-08-21T17:30:00Z",
+        "release_time": None,
+        "average_entry_score": 50,
+        "finished": False,
+        "data_checked": False,
+        "highest_scoring_entry": None,
+        "deadline_time_epoch": 1787333400,
+        "deadline_time_game_offset": 0,
+        "highest_score": None,
+        "transfers_made": 0,
+        "is_previous": False,
+        "is_current": event_id == 1,
+        "is_next": False,
+        "cup_leagues_created": False,
+        "h2h_ko_matches_created": False,
+        "can_enter": False,
+        "can_manage": False,
+        "most_selected": None,
+        "most_transferred_in": None,
+        "top_element": None,
+        "most_captained": None,
+        "most_vice_captained": None,
+        "chip_plays": [],
+        "overrides": {"rules": {}, "scoring": {}},
+        "top_element_info": {"id": 115, "points": 17},
+    }
+
+def make_cursor_context(cursor):
+	context = MagicMock()
+	context.__enter__.return_value = cursor
+	return context
 
 @pytest.mark.parametrize(
 	("response", "message"),
@@ -10,11 +48,15 @@ from src.ingestion.sync import FPLSyncService
 		({}, "FPL bootstrap response is missing required key: teams"),
 		({"teams": []}, "FPL bootstrap response is missing required key: elements"),
 		(
-			{"teams": {}, "elements": []},
+			{"teams": [], "elements": []},
+			"FPL bootstrap response is missing required key: events",
+		),
+		(
+			{"teams": {}, "elements": [], "events": [make_event()]},
 			"FPL bootstrap teams and elements must be lists",
 		),
 		(
-			{"teams": [], "elements": {}},
+			{"teams": [], "elements": {}, "events": [make_event()]},
 			"FPL bootstrap teams and elements must be lists",
 		),
 	],
@@ -28,9 +70,62 @@ def test_sync_bootstrap_data_rejects_invalid_response(response, message):
 		with pytest.raises(ValueError, match=message) as exc_info:
 			FPLSyncService.sync_bootstrap_data(db)
 
-	if response == {} or response == {"teams": []}:
+	if response in ({}, {"teams": []}, {"teams": [], "elements": []}):
 		assert isinstance(exc_info.value.__cause__, KeyError)
 	# Invalid payloads are rejected before the database is opened.
+	db.cursor.assert_not_called()
+
+@pytest.mark.parametrize(
+	("events", "message"),
+	[
+		(None, "FPL bootstrap events must be a non-empty list"),
+		([], "FPL bootstrap events must be a non-empty list"),
+		({}, "FPL bootstrap events must be a non-empty list"),
+		([None], "FPL bootstrap events must contain objects"),
+		(
+			[{**make_event(), "id": 0}],
+			"FPL event must have a positive integer id",
+		),
+		(
+			[make_event(), make_event()],
+			"Duplicate FPL event id: 1",
+		),
+		(
+			[{key: value for key, value in make_event().items() if key != "name"}],
+			"FPL event 1 is missing fields: name",
+		),
+		(
+			[{**make_event(), "name": " "}],
+			"FPL event 1 has an invalid name",
+		),
+		(
+			[{**make_event(), "deadline_time": "not-a-date"}],
+			"FPL event 1 has an invalid deadline_time",
+		),
+		(
+			[{**make_event(), "deadline_time": "2026-08-21T17:30:00"}],
+			"FPL event 1 deadline_time must include a timezone",
+		),
+		(
+			[{**make_event(), "release_time": "not-a-date"}],
+			"FPL event 1 has an invalid release_time",
+		),
+	],
+)
+def test_sync_bootstrap_data_rejects_invalid_events(events, message):
+	db = Mock()
+	response = {
+		"teams": [],
+		"elements": [],
+		"events": events,
+	}
+
+	with patch(
+		"src.ingestion.sync.FPLClient.get_bootstrap_static", return_value=response
+	):
+		with pytest.raises(ValueError, match=message):
+			FPLSyncService.sync_bootstrap_data(db)
+
 	db.cursor.assert_not_called()
 
 def test_sync_bootstrap_data_writes_teams_and_players():
@@ -85,15 +180,27 @@ def test_sync_bootstrap_data_writes_teams_and_players():
 	}
 	team_cursor = Mock()
 	player_cursor = Mock()
+	event_cursor = Mock()
 	team_context = MagicMock()
 	team_context.__enter__.return_value = team_cursor
 	player_context = MagicMock()
 	player_context.__enter__.return_value = player_cursor
+	event_context = MagicMock()
+	event_context.__enter__.return_value = event_cursor
 	db = Mock()
-	db.cursor.side_effect = [team_context, player_context]
+	db.cursor.side_effect = [team_context, player_context, event_context]
+	event = make_event()
+	event.update(
+		{
+			"most_selected": 10,
+			"top_element": 11,
+			"chip_plays": [{"chip_name": "wildcard", "num_played": 12}],
+		}
+	)
 	response = {
 		"teams": team_rows,
 		"elements": [first_player, second_player],
+		"events": [event],
 	}
 
 	with patch(
@@ -101,8 +208,8 @@ def test_sync_bootstrap_data_writes_teams_and_players():
 	):
 		FPLSyncService.sync_bootstrap_data(db)
 
-	# Teams and players are written in separate cursor contexts.
-	assert db.cursor.call_count == 2
+	# Teams, players, and events are written in separate cursor contexts.
+	assert db.cursor.call_count == 3
 	assert [execute_call.args[1] for execute_call in team_cursor.execute.call_args_list] == [
 		(1, "Arsenal", "ARS", 1, 3),
 		(2, "Villa", "AVL", 2, 7),
@@ -122,6 +229,22 @@ def test_sync_bootstrap_data_writes_teams_and_players():
 	assert second_player_params[9:11] == (None, None)
 	assert second_player_params[12:] == (None,) * 19
 	assert "INSERT INTO players" in player_cursor.execute.call_args.args[0]
+
+	event_sql, event_params = event_cursor.execute.call_args_list[0].args
+	assert "INSERT INTO events" in event_sql
+	assert "ON CONFLICT (id) DO UPDATE" in event_sql
+	assert event_sql.count("%s") == len(event_params)
+	assert len(event_params) == len(EVENT_COLUMNS) + 1
+	assert event_params[EVENT_COLUMNS.index("id")] == 1
+	assert event_params[EVENT_COLUMNS.index("deadline_time")] == datetime(
+		2026, 8, 21, 17, 30, tzinfo=timezone.utc
+	)
+	assert event_params[EVENT_COLUMNS.index("release_time")] is None
+	assert event_params[EVENT_COLUMNS.index("most_selected")] == 10
+	assert event_params[-1].adapted == event
+	delete_sql, delete_params = event_cursor.execute.call_args_list[1].args
+	assert "DELETE FROM events" in delete_sql
+	assert delete_params == ([1],)
 
 def test_sync_bootstrap_data_propagates_fetch_errors():
 	db = Mock()
@@ -149,6 +272,7 @@ def test_sync_bootstrap_data_propagates_database_errors():
 			{"id": 1, "name": "Arsenal", "short_name": "ARS", "position": 1, "code": 3}
 		],
 		"elements": [],
+		"events": [make_event()],
 	}
 
 	with patch(
