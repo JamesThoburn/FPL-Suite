@@ -1,5 +1,6 @@
-package com.jamesthoburn.fplsuite.entities;
+package com.jamesthoburn.fplsuite.player;
 
+import com.jamesthoburn.fplsuite.team.Team;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +27,7 @@ public class Player {
     private String webName;
 
     @Column(nullable = false)
-    private String elementTypeId;
+    private Integer elementTypeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", nullable = false)

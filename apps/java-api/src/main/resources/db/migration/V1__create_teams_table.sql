@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS teams
+(
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    short_name VARCHAR(3) NOT NULL,
+    position SMALLINT NOT NULL,
+    code INTEGER NOT NULL
+);

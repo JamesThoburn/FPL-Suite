@@ -1,4 +1,4 @@
-package com.jamesthoburn.fplsuite.entities;
+package com.jamesthoburn.fplsuite.team;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

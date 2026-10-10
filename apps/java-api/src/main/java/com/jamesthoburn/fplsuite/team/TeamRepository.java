@@ -1,6 +1,5 @@
-package com.jamesthoburn.fplsuite.repositories;
+package com.jamesthoburn.fplsuite.team;
 
-import com.jamesthoburn.fplsuite.entities.Team;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
