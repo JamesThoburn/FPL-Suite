@@ -7,11 +7,13 @@ import { getActiveNav } from "@/data/navigation";
 type TopbarProps = {
     isMobileNavOpen: boolean;
     onToggleMobileNav: () => void;
+    seasonLabel: string | null;
 };
 
 export default function Topbar({
     isMobileNavOpen,
-    onToggleMobileNav
+    onToggleMobileNav,
+    seasonLabel,
 }: TopbarProps) {
     const pathname = usePathname();
     const active = getActiveNav(pathname);
@@ -38,8 +40,11 @@ export default function Topbar({
                 <strong className="font-medium text-text-breadcrumb-strong">{active.label}</strong>
             </div>
             <div className="flex items-center gap-5.75 max-[700px]:gap-3.75">
-                {/* Will need fetched somehow */}
-                <span className="text-[8px] font-semibold tracking-[1.6px] text-text-season-label max-[700px]:hidden">2024 / 25 SEASON</span>
+                {seasonLabel && (
+                    <span className="text-[8px] font-semibold tracking-[1.6px] text-text-season-label max-[700px]:hidden">
+                        {seasonLabel} SEASON
+                    </span>
+                )}
             </div>
         </header>
     )

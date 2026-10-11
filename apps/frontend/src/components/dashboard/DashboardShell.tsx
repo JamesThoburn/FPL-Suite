@@ -5,11 +5,15 @@ import DashboardFooter from "./DashboardFooter";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 
+type DashboardShellProps = {
+    children: ReactNode;
+    seasonLabel: string | null;
+}
+
 export default function DashboardShell({
     children,
-}: {
-    children: ReactNode;
-}) {
+    seasonLabel
+}: DashboardShellProps) {
     const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
     useEffect(() => {
@@ -53,6 +57,7 @@ export default function DashboardShell({
                     onToggleMobileNav={() =>
                         setIsMobileNavOpen((open) => !open)
                     }
+                    seasonLabel={seasonLabel}
                 />
 
                 <main className="mx-auto max-w-360 px-10 pt-8.5 max-[1200px]:px-7 max-[1000px]:px-5.5 max-[700px]:px-4.75 max-[700px]:pt-6.25 min-[1450px]:pt-10.75">
