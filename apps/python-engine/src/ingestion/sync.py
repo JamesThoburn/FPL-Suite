@@ -69,12 +69,38 @@ PLAYER_COLUMNS = tuple(col for col, _, _ in PLAYER_FIELDS)
 TEAM_COLUMNS = ("id", "name", "short_name", "position", "code")
 EVENT_UPSERT_COLUMNS = (*EVENT_COLUMNS, "payload", "synced_at")
 EVENT_TEMPLATE = "(" + ", ".join(["%s"] * (len(EVENT_COLUMNS) + 1)) + ", now())"
+TEAM_REQUIRED_KEYS = TEAM_COLUMNS
+PLAYER_REQUIRED_KEYS = tuple(src for _, src, required in PLAYER_FIELDS if required)
 
 def player_row(player):
     return tuple(
         player[src] if required else player.get(src)
         for _, src, required in PLAYER_FIELDS
     )
+
+def validate_records(records, label, required_keys):
+    if not isinstance(records, list) or not records:
+        raise ValueError(f"FPL bootstrap {label} must be a non-empty list")
+
+    seen_ids = set()
+
+    for record in records:
+        if not isinstance(record, dict):
+            raise ValueError(f"FPL bootstrap {label} must contain objects")
+
+        record_id = record.get("id")
+        if type(record_id) is not int or record_id <= 0:
+            raise ValueError(f"FPL {label} entry must have a positive integer id")
+
+        if record_id in seen_ids:
+            raise ValueError(f"Duplicate FPL {label} id: {record_id}")
+        seen_ids.add(record_id)
+
+        missing = [key for key in required_keys if key not in record]
+        if missing:
+            raise ValueError(
+                f"FPL {label} {record_id} is missing fields: {', '.join(missing)}"
+            )
 
 def parse_event_timestamp(value, event_id: int, field: str):
     if value is None:
@@ -171,10 +197,9 @@ class FPLSyncService:
                 f"FPL bootstrap response is missing required key: {exc.args[0]}"
             ) from exc
 
-        # Making sure the teams and players data are lists
-        if not isinstance(teams_data, list) or not isinstance(players_data, list):
-            raise ValueError("FPL bootstrap teams and elements must be lists")
-
+        validate_records(teams_data, "teams", TEAM_REQUIRED_KEYS)
+        validate_records(players_data, "players", PLAYER_REQUIRED_KEYS)
+        
         prepared_events = prepare_events(events_data)
 
         with db.cursor() as cursor:
