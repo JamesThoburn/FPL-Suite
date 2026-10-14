@@ -1,7 +1,9 @@
 package com.jamesthoburn.fplsuite.event;
 
+import com.jamesthoburn.fplsuite.exception.NextGameweekUnavailableException;
 import com.jamesthoburn.fplsuite.exception.SeasonDataUnavailableException;
 import com.jamesthoburn.fplsuite.security.SecurityConfig;
+import lombok.val;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -10,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.Instant;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -69,5 +73,36 @@ public class SeasonControllerTests {
                 .andExpect(jsonPath("$.detail").value(
                         "No event deadlines are available to determine the season"
                 ));
+    }
+
+    @Test
+    void returnsNextGameweekAsJson() throws Exception {
+        when(seasonService.getNextGameweek()).thenReturn(
+                new NextGameweekResponse(
+                        2,
+                        "Gameweek 2",
+                        Instant.parse("2026-08-28T17:30:00Z")
+                )
+        );
+
+        mockMvc.perform(get("/api/v1/season/gameweek/next"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(2))
+                .andExpect(jsonPath("$.name").value("Gameweek 2"))
+                .andExpect(jsonPath("$.deadlineTime").value("2026-08-28T17:30:00Z"));
+    }
+
+    @Test
+    void mapsSeasonEndedToNoContent() throws Exception {
+        when(seasonService.getNextGameweek()).thenThrow(
+                new NextGameweekUnavailableException("Events table is empty")
+        );
+
+        mockMvc.perform(get("/api/v1/season/gameweek/next"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.status").value(503))
+                .andExpect(jsonPath("$.detail").value("Events table is empty"));
     }
 }

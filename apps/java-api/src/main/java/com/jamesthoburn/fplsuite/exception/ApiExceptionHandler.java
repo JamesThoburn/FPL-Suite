@@ -27,4 +27,24 @@ public class ApiExceptionHandler {
                 "The profile contains invalid values"
         );
     }
+
+    @ExceptionHandler(NextGameweekUnavailableException.class)
+    public ProblemDetail handleNextGameweekUnavailable (
+            NextGameweekUnavailableException exception
+    ) {
+        return ProblemDetail.forStatusAndDetail(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                exception.getMessage()
+        );
+    }
+
+    @ExceptionHandler(SeasonEndedException.class)
+    public ProblemDetail handleSeasonEnded (
+            SeasonEndedException exception
+    ) {
+        return ProblemDetail.forStatusAndDetail(
+                HttpStatus.NO_CONTENT,
+                exception.getMessage()
+        );
+    }
 }

@@ -4,8 +4,23 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+import java.util.Optional;
+
 @Repository
 public interface EventRepository extends JpaRepository<Event, Integer> {
+    interface NextEventView {
+        Integer getId();
+        String getName();
+        Instant getDeadlineTime();
+    }
+
+    interface SeasonEndView {
+        Integer getId();
+        Boolean getCurrent();
+        Boolean getFinished();
+    }
+
     @Query(value = """
         SELECT
                 EXTRACT (
@@ -18,4 +33,8 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
         WHERE deadline_time IS NOT NULL
         """, nativeQuery = true)
     SeasonYearProjection findSeasonYears();
+
+    Optional<NextEventView> findFirstByNextTrueOrderByDeadlineTimeAsc();
+
+    Optional<SeasonEndView> findTopByOrderByIdDesc();
 }

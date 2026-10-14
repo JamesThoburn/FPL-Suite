@@ -17,4 +17,9 @@ public class SeasonController {
     public CurrentSeasonResponse getCurrentSeason() {
         return seasonService.getCurrentSeason();
     }
+
+    @GetMapping("/gameweek/next")
+    public NextGameweekResponse getNextGameweek() {
+        return seasonService.getNextGameweek();
+    }
 }

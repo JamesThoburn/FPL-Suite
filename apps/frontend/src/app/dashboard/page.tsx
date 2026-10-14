@@ -1,7 +1,12 @@
-export default function DashboardPage() {
+import Hero from "@/components/dashboard/Hero";
+import { getNextGameweek } from "@/lib/gameweek";
+
+export default async function DashboardPage() {
+  const nextGameweek = await getNextGameweek();
+
   return (
     <>
-        Dashboard Page
+      <Hero nextGameweek={nextGameweek} />
     </>
   )
 }
