@@ -1,7 +1,42 @@
 from datetime import datetime, timezone
-from psycopg2.extras import Json
+from psycopg2.extras import Json, execute_values
 
 from .fpl_client import FPLClient
+
+# (db column name, official FPL API field name, required?)
+PLAYER_FIELDS = (
+    ("id", "id", True),
+    ("code", "code", True),
+    ("first_name", "first_name", True),
+    ("second_name", "second_name", True),
+    ("web_name", "web_name", True),
+    ("element_type_id", "element_type", True),
+    ("team_id", "team", True),
+    ("now_cost", "now_cost", True),
+    ("status", "status", True),
+    ("total_points", "total_points", True),
+    ("chance_of_playing_next_round", "chance_of_playing_next_round", False),
+    ("news", "news", False),
+    ("form", "form", False),
+    ("selected_by_percent", "selected_by_percent", False),
+    ("minutes", "minutes", False),
+    ("goals_scored", "goals_scored", False),
+    ("assists", "assists", False),
+    ("clean_sheets", "clean_sheets", False),
+    ("goals_conceded", "goals_conceded", False),
+    ("own_goals", "own_goals", False),
+    ("penalties_saved", "penalties_saved", False),
+    ("penalties_missed", "penalties_missed", False),
+    ("yellow_cards", "yellow_cards", False),
+    ("red_cards", "red_cards", False),
+    ("saves", "saves", False),
+    ("bonus", "bonus", False),
+    ("bps", "bps", False),
+    ("expected_goals", "expected_goals", False),
+    ("expected_assists", "expected_assists", False),
+    ("expected_goal_involvements", "expected_goal_involvements", False),
+    ("expected_goals_conceded", "expected_goals_conceded", False)
+)
 
 EVENT_COLUMNS = (
     "id",
@@ -29,6 +64,17 @@ EVENT_COLUMNS = (
     "most_captained",
     "most_vice_captained",
 )
+
+PLAYER_COLUMNS = tuple(col for col, _, _ in PLAYER_FIELDS)
+TEAM_COLUMNS = ("id", "name", "short_name", "position", "code")
+EVENT_UPSERT_COLUMNS = (*EVENT_COLUMNS, "payload", "synced_at")
+EVENT_TEMPLATE = "(" + ", ".join(["%s"] * (len(EVENT_COLUMNS) + 1)) + ", now())"
+
+def player_row(player):
+    return tuple(
+        player[src] if required else player.get(src)
+        for _, src, required in PLAYER_FIELDS
+    )
 
 def parse_event_timestamp(value, event_id: int, field: str):
     if value is None:
@@ -92,8 +138,21 @@ def prepare_events(events):
 
     return prepared
 
+def upsert(cursor, table, columns, rows, template=None, page_size=1000):
+    updates = ", ".join(f"{c} = EXCLUDED.{c}" for c in columns if c != "id")
+    execute_values(
+        cursor,
+        f"""
+        INSERT INTO {table} ({", ".join(columns)}) VALUES %s
+        ON CONFLICT (id) DO UPDATE SET {updates}
+        """,
+        rows,
+        template=template,
+        page_size=page_size
+    )
+
 class FPLSyncService:
-    # Gets overrall bootstrap data from the FPL API and updates teams and players in PostgreSQL database
+    # Gets overall bootstrap data from the FPL API and updates teams, players and events in PostgreSQL database
     @staticmethod
     def sync_bootstrap_data(db):
         data = FPLClient.get_bootstrap_static()
@@ -118,97 +177,30 @@ class FPLSyncService:
 
         prepared_events = prepare_events(events_data)
 
-        # Update teams in the database
         with db.cursor() as cursor:
-            for team in teams_data:
-                cursor.execute(
-                    """
-                    INSERT INTO teams (id, name, short_name, position, code)
-                    VALUES (%s, %s, %s, %s, %s)
-                    ON CONFLICT (id) DO UPDATE SET
-                        name = EXCLUDED.name,
-                        short_name = EXCLUDED.short_name,
-                        position = EXCLUDED.position,
-                        code = EXCLUDED.code;
-                    """,
-                    (team["id"], team["name"], team["short_name"], team["position"], team["code"]),
-                )
-
-        # Update players in the database
-        with db.cursor() as cursor:
-            for player in players_data:
-                cursor.execute(
-                    """
-                    INSERT INTO players (id, code, first_name, second_name, web_name, element_type_id, team_id, now_cost, status, chance_of_playing_next_round, news, total_points, form, selected_by_percent, minutes, goals_scored, assists, clean_sheets, goals_conceded, own_goals, penalties_saved, penalties_missed, yellow_cards, red_cards, saves, bonus, bps, expected_goals, expected_assists, expected_goal_involvements, expected_goals_conceded)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (id) DO UPDATE SET
-                        code = EXCLUDED.code,
-                        first_name = EXCLUDED.first_name,
-                        second_name = EXCLUDED.second_name,
-                        web_name = EXCLUDED.web_name,
-                        element_type_id = EXCLUDED.element_type_id,
-                        team_id = EXCLUDED.team_id,
-                        now_cost = EXCLUDED.now_cost,
-                        status = EXCLUDED.status,
-                        chance_of_playing_next_round = EXCLUDED.chance_of_playing_next_round,
-                        news = EXCLUDED.news,
-                        total_points = EXCLUDED.total_points,
-                        form = EXCLUDED.form,
-                        selected_by_percent = EXCLUDED.selected_by_percent,
-                        minutes = EXCLUDED.minutes,
-                        goals_scored = EXCLUDED.goals_scored,
-                        assists = EXCLUDED.assists,
-                        clean_sheets = EXCLUDED.clean_sheets,
-                        goals_conceded = EXCLUDED.goals_conceded,
-                        own_goals = EXCLUDED.own_goals,
-                        penalties_saved = EXCLUDED.penalties_saved,
-                        penalties_missed = EXCLUDED.penalties_missed,
-                        yellow_cards = EXCLUDED.yellow_cards,
-                        red_cards = EXCLUDED.red_cards,
-                        saves = EXCLUDED.saves,
-                        bonus = EXCLUDED.bonus,
-                        bps = EXCLUDED.bps,
-                        expected_goals = EXCLUDED.expected_goals,
-                        expected_assists = EXCLUDED.expected_assists,
-                        expected_goal_involvements = EXCLUDED.expected_goal_involvements,
-                        expected_goals_conceded = EXCLUDED.expected_goals_conceded;
-                    """,
-                    (player["id"], player["code"], player["first_name"], player["second_name"], player["web_name"], player["element_type"], player["team"], player["now_cost"], player["status"], player.get("chance_of_playing_next_round"), player.get("news"), player["total_points"], player.get("form"), player.get("selected_by_percent"), player.get("minutes"), player.get("goals_scored"), player.get("assists"), player.get("clean_sheets"), player.get("goals_conceded"), player.get("own_goals"), player.get("penalties_saved"), player.get("penalties_missed"), player.get("yellow_cards"), player.get("red_cards"), player.get("saves"), player.get("bonus"), player.get("bps"), player.get("expected_goals"), player.get("expected_assists"), player.get("expected_goal_involvements"), player.get("expected_goals_conceded")),
-                )
-
-        # Events
-        event_columns_sql = ", ".join(EVENT_COLUMNS)
-        event_placeholders_sql = ", ".join(["%s"] * len(EVENT_COLUMNS))
-        event_updates_sql = ", ".join(
-            f"{column} = EXCLUDED.{column}"
-            for column in EVENT_COLUMNS
-            if column != "id"
-        )
-
-        upsert_event_sql = f"""
-            INSERT INTO events (
-                {event_columns_sql},
-                payload,
-                synced_at
+            upsert(
+                cursor,
+                "teams",
+                TEAM_COLUMNS,
+                [tuple(t[c] for c in TEAM_COLUMNS) for t in teams_data],
             )
-            VALUES (
-                {event_placeholders_sql},
-                %s,
-                now()
+
+            upsert(
+                cursor,
+                "players",
+                PLAYER_COLUMNS,
+                [player_row(p) for p in players_data],
             )
-            ON CONFLICT (id) DO UPDATE SET
-                {event_updates_sql},
-                payload = EXCLUDED.payload,
-                synced_at = now()
-        """
 
-        event_ids = [event_id for event_id, _, _ in prepared_events]
-
-        with db.cursor() as cursor:
-            for _, values, payload in prepared_events:
-                cursor.execute(upsert_event_sql, (*values, payload))
+            upsert(
+                cursor,
+                "events",
+                EVENT_UPSERT_COLUMNS,
+                [(*values, payload) for _, values, payload in prepared_events],
+                template=EVENT_TEMPLATE
+            )
 
             cursor.execute(
                 "DELETE FROM events WHERE NOT (id = ANY(%s))",
-                (event_ids,),
+                ([event_id for event_id, _, _ in prepared_events],),
             )
