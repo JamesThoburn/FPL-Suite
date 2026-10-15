@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import DashboardFooter from "./DashboardFooter";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import PageHeading from "./PageHeading";
 
 type DashboardShellProps = {
     children: ReactNode;
@@ -61,6 +62,7 @@ export default function DashboardShell({
                 />
 
                 <main className="mx-auto max-w-360 px-10 pt-8.5 max-[1200px]:px-7 max-[1000px]:px-5.5 max-[700px]:px-4.75 max-[700px]:pt-6.25 min-[1450px]:pt-10.75">
+                    <PageHeading />
                     {children}
                     <DashboardFooter />
                 </main>
