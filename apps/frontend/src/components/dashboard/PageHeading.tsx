@@ -11,7 +11,7 @@ export default function PageHeading() {
                 <div className="mb-2.5 text-[8px] font-bold tracking-[1.9px] text-text-eyebrow max-[700px]:mb-2 max-[700px]:text-[7px]">
                     THE BIG PICTURE
                 </div>
-                <h1 className="font-(--font-manrope) text-[30px] leading-[1.35] tracking-[-1.1px] max-[1000px]:text-[27px] max-[700px]:text-2xl max-[700px]:tracking-[-.8px]">
+                <h1 className="font-semibold text-[30px] leading-[1.35] tracking-[-1.1px] max-[1000px]:text-[27px] max-[700px]:text-2xl max-[700px]:tracking-[-.8px]">
                     {pageHeadings[pathname] ?? pageHeadings["/dashboard"]}
                 </h1>
                 <p className="mt-2.25 text-[11px] text-text-page-heading-p max-[700px]:mt-1.5 max-[700px]:max-w-58.75 max-[700px]:text-[10px] max-[700px]:leading-[1.6]">

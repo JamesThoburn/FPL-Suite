@@ -38,6 +38,7 @@ export default function Hero({ nextGameweek }: HeroProps) {
                     Plan your gameweek <Icon name="arrow" size={18} />
                 </Link>
             </div>
+            {/* Deadline Information */}
             <div className="absolute bottom-8.25 right-8.25 w-52.5 rounded-md border border-border-on-dark bg-surface-deadline px-4.5 py-4.25 backdrop-blur-[10px] max-[1000px]:right-5.5 max-[1000px]:w-44 max-[1000px]:p-3.5 max-[700px]:bottom-6 max-[700px]:right-3.75 max-[700px]:w-33.5 max-[700px]:p-3">
                 <span className="text-[7px] tracking-[1.5px] text-text-deadline-span max-[700px]:text-[6px] max-[700px]:tracking-[1px]">NEXT DEADLINE</span>
                 {nextGameweek.status === "upcoming" ? (
