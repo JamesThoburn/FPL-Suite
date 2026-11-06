@@ -6,8 +6,12 @@ from src.ingestion.sync import (
 	EVENT_COLUMNS,
 	EVENT_TEMPLATE,
 	EVENT_UPSERT_COLUMNS,
+	FIXTURE_COLUMNS,
+	FIXTURE_TEMPLATE,
+	FIXTURE_UPSERT_COLUMNS,
 	PLAYER_COLUMNS,
 	FPLSyncService,
+	prepare_fixtures,
 )
 
 def make_event(event_id=1):
@@ -65,6 +69,29 @@ def make_player(player_id=10):
 		"total_points": 50,
 	}
 
+def make_fixture(fixture_id=1, **overrides):
+	fixture = {
+        "id": fixture_id,
+        "code": 2645195 + fixture_id,
+        "event": 1,
+        "finished": False,
+        "finished_provisional": False,
+        "kickoff_time": "2026-08-21T19:00:00Z",
+        "minutes": 0,
+        "provisional_start_time": False,
+        "started": False,
+        "team_a": 2,
+        "team_a_score": None,
+        "team_h": 1,
+        "team_h_score": None,
+        "team_h_difficulty": 2,
+        "team_a_difficulty": 3,
+        "pulse_id": 0,
+        "stats": [],
+    }
+	fixture.update(overrides)
+	return fixture
+
 def make_response(**overrides):
 	response = {
 		"teams": [make_team()],
@@ -100,7 +127,9 @@ def assert_rejected(response, message):
 		(None, "FPL bootstrap response must be an object"),
 		([], "FPL bootstrap response must be an object"),
 		({}, "FPL bootstrap response is missing required key: teams"),
-		({"teams": []}, "FPL bootstrap response is missing required key: elements"),
+		(
+			{"teams": []}, 
+			"FPL bootstrap response is missing required key: elements"),
 		(
 			{"teams": [], "elements": []},
 			"FPL bootstrap response is missing required key: events",
@@ -376,3 +405,241 @@ def test_sync_bootstrap_data_propagates_database_errors():
 	assert exc_info.value is database_error
 	execute_values.assert_called_once()
 	cursor.execute.assert_not_called()
+
+def test_prepare_fixtures_maps_fields_and_flattens_stats():
+	fixture = make_fixture(
+        event=None,
+        kickoff_time=None,
+        stats=[
+            {
+                "identifier": "goals_scored",
+                "a": [{"element": 10, "value": 1}],
+                "h": [{"element": 11, "value": 2}],
+            },
+            {
+                "identifier": "bps",
+                "a": [],
+                "h": [{"element": 11, "value": -2}],
+            },
+        ],
+    )
+
+	fixture_rows, stats_rows, fixture_ids = prepare_fixtures([fixture])
+
+	row = fixture_rows[0]
+	assert len(row) == len(FIXTURE_COLUMNS)
+	assert row[FIXTURE_COLUMNS.index("event")] is None
+	assert row[FIXTURE_COLUMNS.index("kickoff_time")] is None
+	assert row[FIXTURE_COLUMNS.index("team_h_score")] is None
+	assert row[FIXTURE_COLUMNS.index("team_a_score")] is None
+	assert fixture_ids == [1]
+	assert stats_rows == [
+        (1, "goals_scored", "a", 10, 1),
+        (1, "goals_scored", "h", 11, 2),
+        (1, "bps", "h", 11, -2),
+    ]
+
+def test_prepare_fixtures_accepts_empty_stat_arrays():
+    fixture = make_fixture(
+        stats=[{"identifier": "goals_scored", "a": [], "h": []}]
+    )
+
+    fixture_rows, stats_rows, fixture_ids = prepare_fixtures([fixture])
+
+    assert len(fixture_rows) == 1
+    assert stats_rows == []
+    assert fixture_ids == [1]
+
+@pytest.mark.parametrize(
+    ("fixtures", "message"),
+    [
+        (None, "FPL fixtures must be a non-empty list"),
+        ([], "FPL fixtures must be a non-empty list"),
+        ([None], "FPL fixtures must contain objects"),
+        (
+            [make_fixture(id=0)],
+            "FPL fixture must have a positive integer id",
+        ),
+        (
+            [make_fixture(), make_fixture()],
+            "Duplicate FPL fixture id: 1",
+        ),
+        (
+            [without(make_fixture(), "code")],
+            "FPL fixture 1 is missing fields: code",
+        ),
+        (
+            [make_fixture(kickoff_time="not-a-date")],
+            "has an invalid timestamp",
+        ),
+        (
+            [make_fixture(team_h_difficulty=6)],
+            "team_h_difficulty must be at most 5",
+        ),
+        (
+            [make_fixture(team_a_score=-1)],
+            "team_a_score must be at least 0",
+        ),
+        (
+            [make_fixture(stats=None)],
+            "stats must be a list",
+        ),
+        (
+            [
+                make_fixture(
+                    stats=[
+                        {
+                            "identifier": "goals_scored",
+                            "a": [],
+                            "h": None,
+                        }
+                    ]
+                )
+            ],
+            "side h must be a list",
+        ),
+    ],
+)
+def test_prepare_fixtures_rejects_invalid_records(fixtures, message):
+    with pytest.raises(ValueError, match=message):
+        prepare_fixtures(fixtures)
+
+def test_prepare_fixtures_rejects_duplicate_stat_primary_key():
+    fixture = make_fixture(
+        stats=[
+            {
+                "identifier": "goals_scored",
+                "a": [
+                    {"element": 10, "value": 1},
+                    {"element": 10, "value": 2},
+                ],
+                "h": [],
+            }
+        ]
+    )
+
+    with pytest.raises(ValueError, match="Duplicate FPL fixture stat row"):
+        prepare_fixtures([fixture])
+
+def test_sync_fixtures_upserts_fixture_and_replaces_stats():
+    fixture = make_fixture(
+        stats=[
+            {
+                "identifier": "goals_scored",
+                "a": [{"element": 10, "value": 1}],
+                "h": [],
+            }
+        ]
+    )
+    fixture_rows, stats_rows, fixture_ids = prepare_fixtures([fixture])
+    cursor = Mock()
+    db = Mock()
+    db.cursor.return_value = make_cursor_context(cursor)
+
+    with (
+        patch(
+            "src.ingestion.sync.FPLClient.get_fixtures",
+            return_value=[fixture],
+        ),
+        patch("src.ingestion.sync.execute_values") as execute_values,
+    ):
+        FPLSyncService.sync_fixtures(db)
+
+    db.cursor.assert_called_once_with()
+    assert execute_values.call_count == 2
+
+    fixture_call, stats_call = execute_values.call_args_list
+    assert fixture_call.args[0] is cursor
+    assert (
+        f"INSERT INTO fixtures ({', '.join(FIXTURE_UPSERT_COLUMNS)})"
+        in fixture_call.args[1]
+    )
+    assert "ON CONFLICT (id) DO UPDATE SET" in fixture_call.args[1]
+    assert fixture_call.args[2] == fixture_rows
+    assert fixture_call.kwargs["template"] == FIXTURE_TEMPLATE
+
+    assert stats_call.args[0] is cursor
+    assert "INSERT INTO fixture_stats" in stats_call.args[1]
+    assert stats_call.args[2] == stats_rows
+
+    cursor.execute.assert_called_once()
+    delete_sql, delete_params = cursor.execute.call_args.args
+    assert "DELETE FROM fixture_stats" in delete_sql
+    assert delete_params == (fixture_ids,)
+
+def test_sync_fixtures_with_no_stats_only_upserts_fixtures():
+    fixture = make_fixture()
+    cursor = Mock()
+    db = Mock()
+    db.cursor.return_value = make_cursor_context(cursor)
+
+    with (
+        patch(
+            "src.ingestion.sync.FPLClient.get_fixtures",
+            return_value=[fixture],
+        ),
+        patch("src.ingestion.sync.execute_values") as execute_values,
+    ):
+        FPLSyncService.sync_fixtures(db)
+
+    execute_values.assert_called_once()
+    cursor.execute.assert_called_once()
+    assert "DELETE FROM fixture_stats" in cursor.execute.call_args.args[0]
+
+
+def test_sync_fixtures_rejects_invalid_response_before_opening_cursor():
+    db = Mock()
+
+    with patch("src.ingestion.sync.FPLClient.get_fixtures", return_value=[]):
+        with pytest.raises(
+            ValueError,
+            match="FPL fixtures must be a non-empty list",
+        ):
+            FPLSyncService.sync_fixtures(db)
+
+    db.cursor.assert_not_called()
+
+
+def test_sync_fixtures_propagates_fetch_errors_without_opening_cursor():
+    db = Mock()
+    fetch_error = RuntimeError("FPL API unavailable")
+
+    with patch(
+        "src.ingestion.sync.FPLClient.get_fixtures",
+        side_effect=fetch_error,
+    ):
+        with pytest.raises(
+            RuntimeError,
+            match="FPL API unavailable",
+        ) as exc_info:
+            FPLSyncService.sync_fixtures(db)
+
+    assert exc_info.value is fetch_error
+    db.cursor.assert_not_called()
+
+
+def test_sync_fixtures_propagates_database_errors():
+    fixture = make_fixture()
+    cursor = Mock()
+    db = Mock()
+    db.cursor.return_value = make_cursor_context(cursor)
+    database_error = RuntimeError("database unavailable")
+
+    with (
+        patch(
+            "src.ingestion.sync.FPLClient.get_fixtures",
+            return_value=[fixture],
+        ),
+        patch(
+            "src.ingestion.sync.execute_values",
+            side_effect=database_error,
+        ),
+    ):
+        with pytest.raises(
+            RuntimeError,
+            match="database unavailable",
+        ) as exc_info:
+            FPLSyncService.sync_fixtures(db)
+
+    assert exc_info.value is database_error
+    cursor.execute.assert_not_called()

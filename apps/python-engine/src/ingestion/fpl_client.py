@@ -1,5 +1,6 @@
 import requests
 import logging
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -9,7 +10,7 @@ class FPLClient:
 
     # A general method to make GET requests to the FPL API and handle errors. Done this way for modularity
     @classmethod
-    def _get(cls, endpoint: str) -> dict:
+    def _get(cls, endpoint: str) -> Any:
         url = f"{cls.BASE_URL}{endpoint}"
         try:
             response = requests.get(url, timeout=cls.REQUEST_TIMEOUT)

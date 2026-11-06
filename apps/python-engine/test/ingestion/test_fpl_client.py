@@ -3,8 +3,14 @@ import pytest
 import requests
 from src.ingestion.fpl_client import FPLClient
 
-def test_get_returns_json_after_successful_request():
-	response_data = {"teams": [{"id": 1}]}
+@pytest.mark.parametrize(
+		"response_data",
+		[
+			{"teams": [{"id": 1}]},
+			[{"id": 1, "event": 1}],
+		]
+)
+def test_get_returns_json_after_successful_request(response_data):
 	response = Mock()
 	response.json.return_value = response_data
 
@@ -47,17 +53,35 @@ def test_get_logs_and_reraises_request_exceptions(failure_stage):
 	assert response.json.call_count == int(failure_stage == "json")
 
 @pytest.mark.parametrize(
-	("method_name", "args", "endpoint"),
-	[
-		("get_bootstrap_static", (), "/bootstrap-static/"),
-		("get_fixtures", (), "/fixtures/"),
-		("get_live_gameweek", (8,), "/event/8/live/"),
-		("get_player_summary", (42,), "/element-summary/42"),
-	],
+    ("method_name", "args", "endpoint", "response_data"),
+    [
+        (
+            "get_bootstrap_static",
+            (),
+            "/bootstrap-static/",
+            {"result": "ok"},
+        ),
+        (
+            "get_fixtures",
+            (),
+            "/fixtures/",
+            [{"id": 1, "event": 1}],
+        ),
+        (
+            "get_live_gameweek",
+            (8,),
+            "/event/8/live/",
+            {"result": "ok"},
+        ),
+        (
+            "get_player_summary",
+            (42,),
+            "/element-summary/42",
+            {"result": "ok"},
+        ),
+    ],
 )
-def test_endpoint_helpers_request_the_expected_endpoint(method_name, args, endpoint):
-	response_data = {"result": "ok"}
-
+def test_endpoint_helpers_request_the_expected_endpoint(method_name, args, endpoint, response_data):
 	with patch.object(FPLClient, "_get", return_value=response_data) as get:
 		result = getattr(FPLClient, method_name)(*args)
 
