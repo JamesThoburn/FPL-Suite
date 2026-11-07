@@ -11,7 +11,7 @@ class FPLClient:
     # A general method to make GET requests to the FPL API and handle errors. Done this way for modularity
     @classmethod
     def _get(cls, endpoint: str) -> Any:
-        url = f"{cls.BASE_URL}{endpoint}"
+        url = f"{cls.BASE_URL.rstrip('/')}/{endpoint.lstrip('/')}"
         try:
             response = requests.get(url, timeout=cls.REQUEST_TIMEOUT)
             response.raise_for_status()

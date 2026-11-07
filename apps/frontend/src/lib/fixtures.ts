@@ -141,7 +141,7 @@ export async function getFixtures(): Promise<FixturesResult> {
         const res = await fetch(
             `${baseUrl.replace(/\/+$/, "")}/api/v1/fixtures`,
             {
-                next: { revalidate: 60 },
+                next: { revalidate: 10 },
                 signal: AbortSignal.timeout(5000),
             }
         )
