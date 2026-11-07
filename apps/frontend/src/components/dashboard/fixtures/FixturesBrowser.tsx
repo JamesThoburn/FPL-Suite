@@ -4,19 +4,29 @@ import { FixturesResult } from "@/lib/fixtures";
 import { useState } from "react";
 import FixtureRow from "./FixtureRow";
 
-const gameweekStartFormatter = new Intl.DateTimeFormat("en-GB", {
+const fixtureDayFormatter = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Europe/London",
     weekday: "long",
     day: "numeric",
     month: "long",
 });
+const fixtureDayKeyFormatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+});
 
-function formatGameweekStartDate(start: string | null) {
-    if (!start) return "DATE TBC";
+function getFixtureDay(kickoffTime: string) {
+    const kickoff = new Date(kickoffTime);
+    const keyParts = fixtureDayKeyFormatter.formatToParts(kickoff);
+    const keyPart = (type: Intl.DateTimeFormatPartTypes) =>
+        keyParts.find((item) => item.type === type)?.value ?? "";
 
-    return gameweekStartFormatter
-        .format(new Date(start))
-        .toLocaleUpperCase("en-GB");
+    return {
+        key: `${keyPart("year")}-${keyPart("month")}-${keyPart("day")}`,
+        label: fixtureDayFormatter.format(kickoff).toLocaleUpperCase("en-GB"),
+    };
 }
 
 const londonDateFormatter = new Intl.DateTimeFormat("en-GB", {
@@ -96,6 +106,20 @@ export default function FixturesBrowser({ result }: { result: FixturesResult }) 
             )
         })
 
+    const fixturesByDay = new Map<string, { label: string; fixtures: typeof gameweekFixtures }>();
+    for (const fixture of gameweekFixtures) {
+        const day = fixture.kickoffTime
+            ? getFixtureDay(fixture.kickoffTime)
+            : { key: "tbc", label: "DATE TBC" };
+        const group = fixturesByDay.get(day.key);
+
+        if (group) {
+            group.fixtures.push(fixture);
+        } else {
+            fixturesByDay.set(day.key, { label: day.label, fixtures: [fixture] });
+        }
+    }
+
     const previousGameweek = data.gameweeks[selectedIndex - 1];
     const nextGameweek = data.gameweeks[selectedIndex + 1];
 
@@ -137,11 +161,15 @@ export default function FixturesBrowser({ result }: { result: FixturesResult }) 
                     </button>
                 </div>
             </div>
-            <div className="bg-surface-fixture-date px-5.25 py-2.25 text-[7px] font-semibold tracking-[1.2px] text-text-fixture-date">
-                {formatGameweekStartDate(selectedGameweek.firstKickoffTime)}
-            </div>
-            {gameweekFixtures.map((fixture) => (
-                <FixtureRow key={fixture.id} fixture={fixture} wide />
+            {[...fixturesByDay.entries()].map(([dayKey, group]) => (
+                <div key={dayKey}>
+                    <div className="bg-surface-fixture-date px-5.25 py-2.25 text-[7px] font-semibold tracking-[1.2px] text-text-fixture-date">
+                        {group.label}
+                    </div>
+                    {group.fixtures.map((fixture) => (
+                        <FixtureRow key={fixture.id} fixture={fixture} wide />
+                    ))}
+                </div>
             ))}
         </section>
     )
